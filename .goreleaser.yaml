@@ -51,28 +51,21 @@ release:
     Released by [GoReleaser](https://github.com/goreleaser/goreleaser).
 
 winget:
-  - # Name of the recipe
-    #
-    # Default: the project name.
-    # Templates: allowed.
-    name: objective-mcfunction
+  - name: objective-mcfunction # 앱 이름, 기본값: 프로젝트 이름
+    publisher: nutoo_ # 필수: 배포자 이름
+    short_description: "Datapack Compiler" # 필수: 앱 설명
+    license: "mit" # 필수: 라이선스 이름
+    package_identifier: nutoo_.objective-mcfunction # 필수: Winget 패키지 ID
 
-    # Publisher name.
-    #
-    # Templates: allowed.
-    # Required
-    publisher: Nutoo
-
-    # Your app's description.
-    #
-    # Templates: allowed.
-    # Required
-    # Default: inferred from global metadata.
-    short_description: "Datapack Compiler"
-
-    # License name.
-    #
-    # Templates: allowed.
-    # Required
-    # Default: inferred from global metadata.
-    license: "mit"
+    repository:
+      owner: gonggo124 # 필수: 포크 저장소 owner
+      name: winget-pkgs # 필수: 포크 저장소 이름
+      branch: main # PR 보낼 브랜치
+      token: "{{ .Env.GITHUB_TOKEN }}" # 필수: GitHub PAT
+      token_type: "github"
+      pull_request:
+        enabled: true
+        base:
+          owner: microsoft # 원본 winget-pkgs owner
+          name: winget-pkgs # 원본 winget-pkgs 이름
+          branch: main
