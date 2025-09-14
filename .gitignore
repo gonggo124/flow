@@ -1,4 +1,3 @@
-# Added by goreleaser init:
-dist/
 secure/
 .TODO
+.gitignore
