@@ -55,7 +55,7 @@ winget:
     #
     # Default: the project name.
     # Templates: allowed.
-    # name: objective-mcfunction
+    name: objective-mcfunction
 
     # Publisher name.
     #
