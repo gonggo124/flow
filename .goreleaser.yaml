@@ -59,4 +59,10 @@ winget:
 
     repository:
       owner: gonggo124 # 필수: 포크 저장소 owner
-      name: objective-mcfunction # 필수: 포크 저장소 이름
+      name: objective-mcfunction # 필수: 포크 저장소 이름\
+      pull_request:
+        enabled: true
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: main
