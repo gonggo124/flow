@@ -60,12 +60,3 @@ winget:
     repository:
       owner: gonggo124 # 필수: 포크 저장소 owner
       name: winget-pkgs # 필수: 포크 저장소 이름
-      branch: main # PR 보낼 브랜치
-      token: "{{ .Env.GITHUB_TOKEN }}" # 필수: GitHub PAT
-      token_type: "github"
-      pull_request:
-        enabled: true
-        base:
-          owner: microsoft # 원본 winget-pkgs owner
-          name: winget-pkgs # 원본 winget-pkgs 이름
-          branch: main
