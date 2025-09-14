@@ -49,3 +49,30 @@ release:
     ---
 
     Released by [GoReleaser](https://github.com/goreleaser/goreleaser).
+
+winget:
+  - # Name of the recipe
+    #
+    # Default: the project name.
+    # Templates: allowed.
+    # name: objective-mcfunction
+
+    # Publisher name.
+    #
+    # Templates: allowed.
+    # Required
+    publisher: Nutoo
+
+    # Your app's description.
+    #
+    # Templates: allowed.
+    # Required
+    # Default: inferred from global metadata.
+    short_description: "Datapack Compiler"
+
+    # License name.
+    #
+    # Templates: allowed.
+    # Required
+    # Default: inferred from global metadata.
+    license: "mit"
