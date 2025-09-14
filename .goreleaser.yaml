@@ -64,12 +64,12 @@ winget:
       owner: gonggo124
       name: winget-pkgs # microsoft/winget-pkgs 저장소 포크
       branch: "objective-mcfunction-{{.Version}}" # PR을 보낼 브랜치 이름
-    # 풀 리퀘스트 자동 생성 설정
-    pull_request:
-      enabled: true
-      draft: true
-      # PR을 보낼 저장소 설정
-      base:
-        owner: microsoft
-        name: winget-pkgs
-        branch: master
+      # 풀 리퀘스트 자동 생성 설정
+      pull_request:
+        enabled: true
+        draft: true
+        # PR을 보낼 저장소 설정
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
