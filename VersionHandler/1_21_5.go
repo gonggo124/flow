@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	utils "github.com/gonggo124/objective-mcfunction/Utils"
-	anonyfunc "github.com/gonggo124/objective-mcfunction/omfn/Anonyfunc"
-	fnreader "github.com/gonggo124/objective-mcfunction/omfn/Reader"
+	utils "flux/Utils"
+	anonyfunc "flux/omfn/Anonyfunc"
+	fnreader "flux/omfn/Reader"
 )
 
 // 이제 안 씀 ㅅㄱ ㅋㅋㅋ

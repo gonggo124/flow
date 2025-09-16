@@ -6,12 +6,12 @@ import (
 	"regexp"
 	"strings"
 
-	utils "github.com/gonggo124/objective-mcfunction/Utils"
-	cmdvh "github.com/gonggo124/objective-mcfunction/VersionHandler"
-	node "github.com/gonggo124/objective-mcfunction/omce/Node"
-	token "github.com/gonggo124/objective-mcfunction/omce/Tokenizer"
-	anonyfunc "github.com/gonggo124/objective-mcfunction/omfn/Anonyfunc"
-	fnreader "github.com/gonggo124/objective-mcfunction/omfn/Reader"
+	utils "flux/Utils"
+	cmdvh "flux/VersionHandler"
+	node "flux/omce/Node"
+	token "flux/omce/Tokenizer"
+	anonyfunc "flux/omfn/Anonyfunc"
+	fnreader "flux/omfn/Reader"
 )
 
 // gpt야 고마워!!!!!!

@@ -13,11 +13,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	ut "github.com/gonggo124/objective-mcfunction/Utils"
-	cmdvh "github.com/gonggo124/objective-mcfunction/VersionHandler"
-	"github.com/gonggo124/objective-mcfunction/omce"
-	"github.com/gonggo124/objective-mcfunction/omfn"
-	anonyfunc "github.com/gonggo124/objective-mcfunction/omfn/Anonyfunc"
+	ut "flux/Utils"
+	cmdvh "flux/VersionHandler"
+	"flux/omce"
+	"flux/omfn"
+	anonyfunc "flux/omfn/Anonyfunc"
 )
 
 // 함수 선언 폴더 읽는 놈

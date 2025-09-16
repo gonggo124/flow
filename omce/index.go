@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 
-	ut "github.com/gonggo124/objective-mcfunction/Utils"
-	lexer "github.com/gonggo124/objective-mcfunction/omce/Lexer"
-	node "github.com/gonggo124/objective-mcfunction/omce/Node"
-	tokenizer "github.com/gonggo124/objective-mcfunction/omce/Tokenizer"
+	ut "flux/Utils"
+	lexer "flux/omce/Lexer"
+	node "flux/omce/Node"
+	tokenizer "flux/omce/Tokenizer"
 )
 
 type MethodSet struct {

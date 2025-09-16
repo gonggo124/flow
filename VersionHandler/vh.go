@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	fnreader "github.com/gonggo124/objective-mcfunction/omfn/Reader"
+	fnreader "flux/omfn/Reader"
 )
 
 // 이름 → 함수 매핑

@@ -1,3 +1,3 @@
-module github.com/gonggo124/objective-mcfunction
+module flux
 
 go 1.24.1

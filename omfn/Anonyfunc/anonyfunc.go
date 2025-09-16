@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	utils "github.com/gonggo124/objective-mcfunction/Utils"
+	utils "flux/Utils"
 )
 
 var anonyfunc_list = make([]string, 0)
