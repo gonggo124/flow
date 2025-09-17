@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 
-	ut "flux/Utils"
-	lexer "flux/omce/Lexer"
-	node "flux/omce/Node"
-	tokenizer "flux/omce/Tokenizer"
+	ut "flow/Utils"
+	lexer "flow/omce/Lexer"
+	node "flow/omce/Node"
+	tokenizer "flow/omce/Tokenizer"
 )
 
 type MethodSet struct {

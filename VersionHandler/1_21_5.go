@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	utils "flux/Utils"
-	anonyfunc "flux/omfn/Anonyfunc"
-	fnreader "flux/omfn/Reader"
+	utils "flow/Utils"
+	anonyfunc "flow/omfn/Anonyfunc"
+	fnreader "flow/omfn/Reader"
 )
 
 // 이제 안 씀 ㅅㄱ ㅋㅋㅋ

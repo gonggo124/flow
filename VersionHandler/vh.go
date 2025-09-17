@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	fnreader "flux/omfn/Reader"
+	fnreader "flow/omfn/Reader"
 )
 
 // 이름 → 함수 매핑

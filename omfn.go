@@ -13,11 +13,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	ut "flux/Utils"
-	cmdvh "flux/VersionHandler"
-	"flux/omce"
-	"flux/omfn"
-	anonyfunc "flux/omfn/Anonyfunc"
+	ut "flow/Utils"
+	cmdvh "flow/VersionHandler"
+	"flow/omce"
+	"flow/omfn"
+	anonyfunc "flow/omfn/Anonyfunc"
 )
 
 // 함수 선언 폴더 읽는 놈
@@ -213,3 +213,4 @@ func main() {
 }
 
 // go run . ../test_datapack
+// rsrc -manifest manifest.xml -o resource.syso

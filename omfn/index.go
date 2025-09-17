@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"os"
 
-	utils "flux/Utils"
-	cmdvh "flux/VersionHandler"
-	fnreader "flux/omfn/Reader"
+	utils "flow/Utils"
+	cmdvh "flow/VersionHandler"
+	fnreader "flow/omfn/Reader"
 )
 
 func Parse(target_path string) string {
