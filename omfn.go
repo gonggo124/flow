@@ -136,7 +136,7 @@ var declaredMethodSets map[string]omce.MethodSet = make(map[string]omce.MethodSe
 	 		   ^^^^^^^ 여기인듯?
 */
 func main() {
-	fmt.Println("경고: 이 작업은 시스템 파일을 수정합니다.")
+	fmt.Println("경고: 이 작업은 파일을 수정합니다.")
 	fmt.Print("계속하시겠습니까? (Y/N): ")
 
 	// 2. 사용자 응답 받기
