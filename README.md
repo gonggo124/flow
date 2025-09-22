@@ -2,7 +2,7 @@
 
 ### 아직 테스트 단계입니다
 
-처음엔 객체지향을 사용 가능한 `mcfunction`의 `superset` 언어가 목표였지만, 현재는 코드 작성을 더 쉽고, 가독성이 좋은 언어를 목표로 하고있습니다.
+처음엔 객체지향을 사용 가능한 `mcfunction`의 `superset` 언어가 목표였지만, 현재는 코드 작성이 더 쉽고, 가독성이 좋은 언어를 목표로 하고있습니다.
 
 코드 하이라이터: https://marketplace.visualstudio.com/items?itemName=nutoo.flow-highlighter
 
