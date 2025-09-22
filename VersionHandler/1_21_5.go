@@ -487,6 +487,7 @@ func v1_21_5_fn(scanner *fnreader.Reader, line string, line_num int) string {
 	var inner_code strings.Builder
 
 	args := v1_21_5_split_cmd(line)
+	fmt.Println("process:", line, args, line_num)
 	idx := 0
 
 	contains := func(s string, sub_s rune) bool {
@@ -508,29 +509,16 @@ func v1_21_5_fn(scanner *fnreader.Reader, line string, line_num int) string {
 
 	length := len(args)
 	for {
-		// switch args[idx] {
-		// case "{":
-		// 	brace_stack += 1
-		// 	inner_code.WriteString("{")
-		// case "}":
-		// 	brace_stack -= 1
-		// 	inner_code.WriteString("}")
-		// case "\\":
-		// 	idx++
-		// 	if idx < length && (args[idx] != "{" && args[idx] != "}") {
-		// 		inner_code.WriteString("\\")
-		// 	}
-		// 	inner_code.WriteString(args[idx] + " ")
-		// default:
-		// 	inner_code.WriteString(args[idx] + " ")
-		// }
-		if strings.Contains(args[idx], "{") {
-			brace_stack += 1
+		fmt.Printf("\rProcessing Fn at line %d; ", utils.GetLine())
+		if length > 0 {
+			if contains(args[idx], '{') {
+				brace_stack += 1
+			}
+			if contains(args[idx], '}') {
+				brace_stack -= 1
+			}
+			inner_code.WriteString(args[idx] + " ")
 		}
-		if contains(args[idx], '}') {
-			brace_stack -= 1
-		}
-		inner_code.WriteString(args[idx] + " ")
 
 		idx++
 		if brace_stack <= 0 {
@@ -546,6 +534,7 @@ func v1_21_5_fn(scanner *fnreader.Reader, line string, line_num int) string {
 			utils.Panic("중괄호가 닫히지 않았습니다")
 		}
 	}
+	fmt.Printf("\rFn Process at line %d done\n", utils.GetLine()) // 프로세스 출력용 fmt.Printf 후 줄바꿈
 	new_code := inner_code.String()
 	new_code = strings.TrimSpace(new_code)
 	new_code = strings.TrimPrefix(new_code, "{")
@@ -559,12 +548,47 @@ func v1_21_5_fn(scanner *fnreader.Reader, line string, line_num int) string {
 	var reader fnreader.Reader
 	reader.SetScanner(scanner2)
 
+	var anony_idx = anonyfunc.Reserve()
+	var anony_path = fmt.Sprintf("%s:anony/%d", os.Getenv("INTERNAL_NAMESPACE"), anony_idx)
+
 	for reader.Scan() {
 		line := reader.Text()
 		line.Text = strings.TrimSpace(line.Text)
+		line.Text = strings.ReplaceAll(line.Text, "__this__", anony_path)
 		writer.WriteString(ParseCmd(&reader, line) + "\n")
 	}
 
-	// anonyfunc.New("")
-	return "function " + anonyfunc.New(writer.String())
+	anonyfunc.Update(anony_idx, writer.String())
+
+	return "function " + anony_path
+}
+
+func v1_21_5_return(scanner *fnreader.Reader, line string, line_num int) string {
+	utils.SetLine(line_num)
+	code := "return "
+
+	args := v1_21_5_split_cmd(line)
+
+	// length := len(args)
+	idx := 0
+
+	push := func() string {
+		cur := args[idx]
+		code += args[idx] + " "
+		idx++
+		return cur
+	}
+
+	returntype := push()
+	if returntype == "run" {
+		// return run ...
+		code = "return run "
+		cut_line := fnreader.Line{Text: strings.Join(args[1:], " "), Number: line_num}
+		code += ParseCmd(scanner, &cut_line)
+	} else {
+		// return ...
+		code += strings.Join(args, " ")
+	}
+
+	return code
 }

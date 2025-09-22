@@ -1,0 +1,8 @@
+function hit_wall {
+    summon tnt
+    kill
+}
+
+function update {
+    tp ^ ^ ^1
+}

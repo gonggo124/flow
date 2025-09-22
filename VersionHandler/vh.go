@@ -16,6 +16,7 @@ func init() {
 	cmdMap["v1_21_5_bind"] = v1_21_5_bind
 	cmdMap["v1_21_5_do"] = v1_21_5_do
 	cmdMap["v1_21_5_fn"] = v1_21_5_fn
+	cmdMap["v1_21_5_return"] = v1_21_5_return
 }
 
 var version = "v1_21_5"

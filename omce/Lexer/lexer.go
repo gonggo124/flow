@@ -3,7 +3,6 @@ package lexer
 import (
 	"bufio"
 	"fmt"
-	"regexp"
 	"strings"
 
 	utils "flow/Utils"
@@ -15,20 +14,20 @@ import (
 )
 
 // gpt야 고마워!!!!!!
-func preprocess(input string) string {
-	// 1) key에 쌍따옴표 붙이기 (Tags:, block_state:, Name: 등)
-	reKey := regexp.MustCompile(`(\w+):`)
-	input = reKey.ReplaceAllString(input, `"$1":`)
+// func preprocess(input string) string {
+// 	// 1) key에 쌍따옴표 붙이기 (Tags:, block_state:, Name: 등)
+// 	reKey := regexp.MustCompile(`(\w+):`)
+// 	input = reKey.ReplaceAllString(input, `"$1":`)
 
-	// 2) 문자열 값에 쌍따옴표가 붙어있지만, 혹시 빠진 곳 있으면 넣어주는 간단 처리 (필요시)
-	// (여기선 이미 문자열은 " "로 되어 있으므로 스킵)
+// 	// 2) 문자열 값에 쌍따옴표가 붙어있지만, 혹시 빠진 곳 있으면 넣어주는 간단 처리 (필요시)
+// 	// (여기선 이미 문자열은 " "로 되어 있으므로 스킵)
 
-	// 3) 숫자 뒤에 붙은 f를 제거 (0f -> 0)
-	reFloatF := regexp.MustCompile(`(\d+(\.\d+)?)[fF]`)
-	input = reFloatF.ReplaceAllString(input, `$1`)
+// 	// 3) 숫자 뒤에 붙은 f를 제거 (0f -> 0)
+// 	reFloatF := regexp.MustCompile(`(\d+(\.\d+)?)[fF]`)
+// 	input = reFloatF.ReplaceAllString(input, `$1`)
 
-	return input
-}
+// 	return input
+// }
 
 // 중괄호 내부 문자열 불러오기.
 // func itsBoring(tokens []token.Token, index *int) string {
