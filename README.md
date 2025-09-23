@@ -14,7 +14,7 @@
 
 `Flow` 코드 예시는 다음과 같습니다:
 
-```js
+```mcfunction
 # main:bullet/init
 data merge entity @s {\
     Tags: ["bullet"],\
