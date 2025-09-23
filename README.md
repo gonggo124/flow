@@ -2,13 +2,15 @@
 
 ### 아직 테스트 단계입니다
 
-처음엔 객체지향을 사용 가능한 `mcfunction`의 `superset` 언어가 목표였지만, 현재는 코드 작성을 더 쉽고, 가독성이 좋은 언어를 목표로 하고있습니다.
+처음엔 객체지향을 사용 가능한 `mcfunction`의 `superset` 언어가 목표였지만, 현재는 코드 작성이 더 쉽고, 가독성이 좋은 언어를 목표로 하고있습니다.
 
 코드 하이라이터: https://marketplace.visualstudio.com/items?itemName=nutoo.flow-highlighter
 
 `Flow`는 기존 `mcfunction` 문법에 약간의 명령어를 추가한 형태의 언어입니다.
 
 그렇기 때문에 기존 바닐라 `mcfunction` 코드를 그대로 가져다 붙여넣어도 `Flow 컴파일러`는 문제를 일으키지 않습니다.
+
+.fl의 기능이 필요없는 함수는 기존처럼 .mcfunction을 사용해서 구현할 수도 있습니다.
 
 `Flow` 코드 예시는 다음과 같습니다:
 
@@ -106,32 +108,46 @@ function hit {
 
 `bind`의 문법은 다음과 같습니다:
 
-```js
+```mcfunction
 bind <선택자> <메서드셋 id>
 ```
 
 예:
 
-```js
+```mcfunction
 bind @s main:bullet
 ```
+
+> `bind`로 메서드셋을 부착한 모든 엔티티는 FLOW.METHODSET.> \<namespace\>.\<methodset 이름\> 구조의 태그를 가집니다.
 
 부착된 함수를 호출하기 위해선 `do`를 사용해야 합니다.
 
 `do`의 문법은 다음과 같습니다.
 
-```js
-execute as @e[tag=bullet,type=marker] run do <함수 이름>
+```mcfunction
+do <함수 이름>
 // 또는
 do <선택자>.<함수 이름>
 ```
 
 예:
 
-```js
-do update
+```mcfunction
+execute as @e[tag=bullet,type=marker] run do update
 // 또는
 do @e[tag=bullet,type=marker].update
+```
+
+bind와 do 활용 예시:
+
+```mcfunction
+# main:bullet, main:arrow, main:stone은 모두 update 메서드를 가집니다.
+execute summon marker run bind @s main:bullet
+execute summon marker run bind @s main:arrow
+execute summon marker run bind @s main:stone
+
+# 각 메서드셋에 맞는 update가 실행됩니다.
+execute as @e[type=marker] at @s run do update
 ```
 
 ### 익명 함수
@@ -142,7 +158,7 @@ do @e[tag=bullet,type=marker].update
 
 예:
 
-```
+```mcfunction
 execute if entity @p[tag=something] run fn {
     say ㄹㄴㅇㄹㅇㄴ
     say fsdffds
@@ -161,8 +177,8 @@ fn {} 자리에 자동 생성된 익명 함수가 들어갑니다.
 
 ## \_\_this\_\_ 키워드
 
-`__this__`를 사용하면 현재 함수를 호출할 수 있습니다.  
-익명함수에서 재귀를 구현할 때 사용하기 위해 구현되었습니다.
+익명함수 내부에서 `__this__`를 사용하면 현재 함수를 다시 호출할 수 있습니다.  
+익명함수에서 재귀를 구현하기 위해 구현되었습니다.
 
 예:
 
