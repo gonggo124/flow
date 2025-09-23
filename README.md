@@ -4,7 +4,7 @@
 
 처음엔 객체지향을 사용 가능한 `mcfunction`의 `superset` 언어가 목표였지만, 현재는 코드 작성이 더 쉽고, 가독성이 좋은 언어를 목표로 하고있습니다.
 
-코드 하이라이터: https://marketplace.visualstudio.com/items?itemName=nutoo.flow-highlighter
+코드 하이라이터: https:#marketplace.visualstudio.com/items?itemName=nutoo.flow-highlighter
 
 `Flow`는 기존 `mcfunction` 문법에 약간의 명령어를 추가한 형태의 언어입니다.
 
@@ -15,7 +15,7 @@
 `Flow` 코드 예시는 다음과 같습니다:
 
 ```js
-// main:bullet/init
+# main:bullet/init
 data merge entity @s {\
     Tags: ["bullet"],\
     block_state:{Name:"blue_ice"},\
@@ -27,7 +27,7 @@ say { is called brace
 
 bind @s main:test/something
 
-// main:tick
+# main:tick
 do @e[tag=bullet,type=block_display].update
 execute as @e[tag=bullet,type=block_display] at @s unless block ~ ~ ~ air run do hit_wall
 execute as @e[tag=bullet,type=block_display] at @s run fn {
@@ -45,7 +45,7 @@ fn { say 1}
 ## 설치/사용
 
 `winget`을 통해 설치가 가능하길 희망하지만 아직 지원하지 않습니다.  
-대신 레포지토리의 [릴리즈](https://github.com/gonggo124/flow/releases/tag/v0.1.0)에서 다운로드하여 환경 변수에 등록해놓으면 콘솔에서 사용할 수 있습니다.
+대신 레포지토리의 [릴리즈](https:#github.com/gonggo124/flow/releases/tag/v0.1.0)에서 다운로드하여 환경 변수에 등록해놓으면 콘솔에서 사용할 수 있습니다.
 
 `flow <대상 데이터팩 경로>`로 사요할 수 있습니다.
 
@@ -126,7 +126,7 @@ bind @s main:bullet
 
 ```mcfunction
 do <함수 이름>
-// 또는
+# 또는
 do <선택자>.<함수 이름>
 ```
 
@@ -134,7 +134,7 @@ do <선택자>.<함수 이름>
 
 ```mcfunction
 execute as @e[tag=bullet,type=marker] run do update
-// 또는
+# 또는
 do @e[tag=bullet,type=marker].update
 ```
 
