@@ -229,9 +229,19 @@ say 10
 ## while
 
 다른 프로그래밍 언어의 while과 매우 유사합니다.
+재귀를 이용해 구현되기 때문에 반복량이 너무 많으면 스택 오버플로우가 날 수 있습니다.
 
 ```mcfunction
 while <execute에서 쓰이는 if/unless문> {
     #반복될 코드
+}
+```
+
+예:
+
+```mcfunction
+while if score a obj matches ..10 {
+    say 1
+    scoreboard players add a obj 1
 }
 ```
