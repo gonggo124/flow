@@ -127,7 +127,6 @@ func v1_21_5_split_cmd(s string) []string {
 // }
 
 func v1_21_5_execute(scanner *fnreader.Reader, line string, line_num int) string {
-	utils.SetLine(line_num)
 	code := "execute "
 	args := v1_21_5_split_cmd(line)
 
@@ -428,7 +427,6 @@ func v1_21_5_execute(scanner *fnreader.Reader, line string, line_num int) string
 }
 
 func v1_21_5_bind(scanner *fnreader.Reader, line string, line_num int) string {
-	utils.SetLine(line_num)
 	code := "execute as "
 
 	args := v1_21_5_split_cmd(line)
@@ -455,7 +453,6 @@ func v1_21_5_bind(scanner *fnreader.Reader, line string, line_num int) string {
 }
 
 func v1_21_5_do(scanner *fnreader.Reader, line string, line_num int) string {
-	utils.SetLine(line_num)
 	code := "execute as "
 
 	args := v1_21_5_split_cmd(line)
@@ -478,7 +475,6 @@ func v1_21_5_do(scanner *fnreader.Reader, line string, line_num int) string {
 }
 
 func v1_21_5_fn(scanner *fnreader.Reader, line string, line_num int) string {
-	utils.SetLine(line_num)
 	// code := ""
 
 	// inner_code := ""
@@ -564,7 +560,6 @@ func v1_21_5_fn(scanner *fnreader.Reader, line string, line_num int) string {
 }
 
 func v1_21_5_return(scanner *fnreader.Reader, line string, line_num int) string {
-	utils.SetLine(line_num)
 	code := "return "
 
 	args := v1_21_5_split_cmd(line)

@@ -1,0 +1,3 @@
+do @e[tag=bullet].update
+
+execute as @e[tag=bullet] if score @s obj matches 20.. run do kill

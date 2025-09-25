@@ -55,9 +55,9 @@ func GetCurrentFile() string {
 func Panic(msg any) {
 	switch val := msg.(type) {
 	case error:
-		panic(val.Error() + " at " + current_file_path + ":" + strconv.Itoa(panic_line))
+		panic(val.Error() + "\n    at " + current_file_path + ":" + strconv.Itoa(panic_line))
 	case string:
-		panic(val + " at " + current_file_path + ":" + strconv.Itoa(panic_line))
+		panic(val + "\n    at " + current_file_path + ":" + strconv.Itoa(panic_line))
 	default:
 		panic("unsupported type in utils.Panic()")
 	}

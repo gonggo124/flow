@@ -1,0 +1,7 @@
+execute \
+    as @a \
+    at @s \
+run fn {
+    say 으악!
+    kill @s
+}

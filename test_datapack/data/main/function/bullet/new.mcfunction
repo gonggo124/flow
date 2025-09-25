@@ -1,1 +1,0 @@
-execute summon block_display run function main:bullet/init

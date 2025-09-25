@@ -1,0 +1,12 @@
+<i=0..10>say count: %i%
+
+# <
+# i=0..10
+# >say count: %i%
+
+<i=0..10,j=5..10> {
+    fn {
+        say count: %i%
+        say count: %j%
+    }
+}

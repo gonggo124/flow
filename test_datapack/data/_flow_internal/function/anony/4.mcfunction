@@ -1,1 +1,2 @@
-tp ^ ^ ^1
+say count: 3
+say count: 8

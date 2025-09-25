@@ -1,1 +1,2 @@
-say 1
+say count: 0
+say count: 5

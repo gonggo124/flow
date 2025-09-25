@@ -1,6 +1,5 @@
-function hit_wall {
-    summon tnt
-    kill
+function kill {
+    kill @s
 }
 
 function update {

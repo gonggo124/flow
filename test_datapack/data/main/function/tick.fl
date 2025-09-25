@@ -1,8 +1,0 @@
-do @e[tag=bullet,type=block_display].update
-execute as @e[tag=bullet,type=block_display] at @s unless block ~ ~ ~ air run do hit_wall
-execute as @e[tag=bullet,type=block_display] at @s run fn {
-    particle dust{color:[0,0,0],scale:1} ~ ~ ~ 0.1 0.1 0.1 0 2
-    particle dust{color:[1,1,1],scale:1} ~ ~ ~ 0.1 0.1 0.1 0 2
-}
-
-fn { say 1}

@@ -136,6 +136,14 @@ var declaredMethodSets map[string]omce.MethodSet = make(map[string]omce.MethodSe
 	 		   ^^^^^^^ 여기인듯?
 */
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("panic 발생:", r)
+			fmt.Println("엔터를 누르면 종료됩니다...")
+			fmt.Scanln() // 입력 대기
+		}
+	}()
+
 	fmt.Print("Given args: ( ")
 	for i, a := range os.Args {
 		if i == 0 {

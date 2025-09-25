@@ -23,6 +23,7 @@ func Parse(target_path string) string {
 
 	for reader.Scan() {
 		line := reader.Text()
+		utils.SetLine(line.Number)
 		result += cmdvh.ParseCmd(&reader, line) + "\n"
 	}
 
