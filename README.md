@@ -225,3 +225,13 @@ say 10
     say %j%
 }
 ```
+
+## while
+
+다른 프로그래밍 언어의 while과 매우 유사합니다.
+
+```mcfunction
+while <execute에서 쓰이는 if/unless문> {
+    #반복될 코드
+}
+```

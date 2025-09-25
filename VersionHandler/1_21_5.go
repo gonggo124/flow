@@ -164,7 +164,7 @@ func v1_21_5_execute(scanner *fnreader.Reader, line string, line_num int) string
 			push()
 			push()
 			continue
-		case "if":
+		case "if", "unless":
 			push()
 			switch args[idx] {
 			case "biome":
@@ -325,99 +325,6 @@ func v1_21_5_execute(scanner *fnreader.Reader, line string, line_num int) string
 		case "summon":
 			push()
 			push()
-		case "unless":
-			push()
-			switch args[idx] {
-			case "biome":
-				push()
-				push()
-				push()
-				push()
-				push()
-			case "block":
-				push()
-				push()
-				push()
-				push()
-				push()
-			case "blocks":
-				push()
-				push()
-				push()
-				push()
-				push()
-				push()
-				push()
-				push()
-				push()
-				push()
-				push()
-			case "data":
-				push()
-				switch args[idx] {
-				case "entity":
-					push()
-					push()
-					push()
-				case "block":
-					push()
-					push()
-					push()
-					push()
-					push()
-				case "storage":
-					push()
-					push()
-					push()
-				}
-			case "dimension":
-				push()
-				push()
-			case "entity":
-				push()
-				push()
-			case "function":
-				push()
-				push()
-			case "items":
-				push()
-				switch args[idx] {
-				case "entity":
-					push()
-					push()
-					push()
-					push()
-				case "block":
-					push()
-					push()
-					push()
-					push()
-					push()
-					push()
-				}
-			case "loaded":
-				push()
-				push()
-				push()
-				push()
-			case "predicate":
-				push()
-				push()
-			case "score":
-				push()
-				push()
-				push()
-				switch args[idx] {
-				case "matches":
-					push()
-					push()
-				default:
-					push()
-					push()
-					push()
-				}
-			}
-			continue
 		default:
 			fmt.Printf("line %d: 엥 이게 뭐람\n", line_num)
 			continue
