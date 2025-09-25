@@ -1,1 +1,1 @@
-title @a title "just do it!\""
+tp ^ ^ ^1

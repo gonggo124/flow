@@ -559,6 +559,141 @@ func v1_21_5_fn(scanner *fnreader.Reader, line string, line_num int) string {
 	return "function " + anony_path
 }
 
+func v1_21_5_while(scanner *fnreader.Reader, line string, line_num int) string {
+
+	brace_stack := 0
+	var inner_code strings.Builder
+
+	args := v1_21_5_split_cmd(line)
+	fmt.Println("process:", line, args, line_num)
+	idx := 0
+
+	condition := ""
+	push := func(cnt int) {
+		for range cnt {
+			condition += args[idx] + " "
+			idx++
+		}
+	}
+
+	push(1)
+	switch args[idx] {
+	case "biome":
+		push(5)
+	case "block":
+		push(5)
+	case "blocks":
+		push(11)
+	case "data":
+		push(1)
+		switch args[idx] {
+		case "entity":
+			push(3)
+		case "block":
+			push(5)
+		case "storage":
+			push(3)
+		}
+	case "dimension", "entity", "function":
+		push(2)
+	case "items":
+		push(1)
+		switch args[idx] {
+		case "entity":
+			push(4)
+		case "block":
+			push(6)
+		}
+	case "loaded":
+		push(4)
+	case "predicate":
+		push(2)
+	case "score":
+		push(3)
+		switch args[idx] {
+		case "matches":
+			push(2)
+		default:
+			push(3)
+		}
+	}
+
+	condition = strings.TrimSpace(condition)
+
+	contains := func(s string, sub_s rune) bool {
+		escaped := false
+		for _, chr := range s {
+			if escaped {
+				escaped = false
+				continue
+			}
+			if chr == '\\' {
+				escaped = true
+			}
+			if chr == sub_s {
+				return true
+			}
+		}
+		return false
+	}
+
+	length := len(args)
+	for {
+		fmt.Printf("\rProcessing Fn at line %d; ", utils.GetLine())
+		if length > 0 {
+			if contains(args[idx], '{') {
+				brace_stack += 1
+			}
+			if contains(args[idx], '}') {
+				brace_stack -= 1
+			}
+			inner_code.WriteString(args[idx] + " ")
+		}
+
+		idx++
+		if brace_stack <= 0 {
+			break
+		} else if idx >= length && scanner.Scan() {
+			inner_code.WriteRune('\n')
+			idx = 0
+			current_line := scanner.Text()
+			utils.SetLine(current_line.Number)
+			args = v1_21_5_split_cmd(current_line.Text)
+			length = len(args)
+		} else if idx >= length {
+			utils.Panic("중괄호가 닫히지 않았습니다")
+		}
+	}
+	fmt.Printf("\rFn Process at line %d done\n", utils.GetLine()) // 프로세스 출력용 fmt.Printf 후 줄바꿈
+	new_code := inner_code.String()
+	new_code = strings.TrimSpace(new_code)
+	new_code = strings.TrimPrefix(new_code, "{")
+	new_code = strings.TrimSuffix(new_code, "}")
+	new_code = strings.TrimSpace(new_code)
+
+	var writer strings.Builder
+
+	scanner2 := bufio.NewScanner(strings.NewReader(new_code))
+
+	var reader fnreader.Reader
+	reader.SetScanner(scanner2)
+
+	var anony_idx = anonyfunc.Reserve()
+	var anony_path = fmt.Sprintf("%s:anony/%d", os.Getenv("INTERNAL_NAMESPACE"), anony_idx)
+
+	for reader.Scan() {
+		line := reader.Text()
+		line.Text = strings.TrimSpace(line.Text)
+		line.Text = strings.ReplaceAll(line.Text, "__this__", anony_path)
+		writer.WriteString(ParseCmd(&reader, line) + "\n")
+	}
+	writer.WriteString("execute " + condition + " run function " + anony_path)
+
+	anonyfunc.Update(anony_idx, writer.String())
+
+	return "execute " + condition + " run function " + anony_path
+}
+
 func v1_21_5_return(scanner *fnreader.Reader, line string, line_num int) string {
 	code := "return "
 

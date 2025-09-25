@@ -1,0 +1,4 @@
+while if score a obj matches ..10 {
+    say 1
+    scoreboard players add a obj 1
+}

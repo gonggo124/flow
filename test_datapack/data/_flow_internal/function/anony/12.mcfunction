@@ -1,2 +1,3 @@
-tp ~1 ~ ~
-execute as @s at @s if score @s something matches 1.. run title @a title "hello"
+say 1
+scoreboard players add a obj 1
+execute if score a obj matches ..10 run function _flow_internal:anony/12
