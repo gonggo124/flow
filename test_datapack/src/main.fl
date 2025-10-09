@@ -1,0 +1,8 @@
+void main() {
+    int a = 120;
+    something(a,169);
+}
+
+void something(int a,int b) {
+    return a;
+}

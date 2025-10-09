@@ -1,0 +1,1 @@
+go run . -i ./test_datapack/src/main.fl -o ./test_datapack

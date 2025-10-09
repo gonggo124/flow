@@ -2,30 +2,87 @@ package omfn
 
 import (
 	"bufio"
+	"fmt"
 	"os"
+	"strings"
 
 	utils "flow/Utils"
-	cmdvh "flow/VersionHandler"
-	fnreader "flow/omfn/Reader"
+	astparser "flow/omfn/AstParser"
+	lexer "flow/omfn/Lexer"
+	perr "flow/omfn/ParseErrors"
+	tokenizer "flow/omfn/Tokenizer"
 )
 
-func Parse(target_path string) string {
-	file := utils.Must(os.Open(target_path))
-	defer file.Close()
+func printTree(ast lexer.Node, depth int) {
+	fmt.Print(strings.Repeat("    ", depth))
+	fmt.Print("[" + fmt.Sprintf("%d", ast.Type) + "]\n")
+	if ast.Name != "" {
+		fmt.Print(strings.Repeat("    ", depth))
+		fmt.Print("    Name: '", ast.Name, "'\n")
+	}
+	if ast.Value != "" {
+		fmt.Print(strings.Repeat("    ", depth))
+		fmt.Print("    Value: '", ast.Value, "'\n")
+	}
+	for _, node := range ast.Body {
+		printTree(node, depth+1)
+	}
+}
 
-	scanner := bufio.NewScanner(file)
-	var reader fnreader.Reader
-	reader.SetScanner(scanner)
+func removeLineComments(src string) string {
+	var result []string
 
-	utils.SetCurrentFile(target_path)
+	reader := strings.NewReader(src)
+	scanner := bufio.NewScanner(reader)
 
-	result := ""
+	for scanner.Scan() {
+		line := scanner.Text()
+		trimmed := strings.TrimSpace(line)
 
-	for reader.Scan() {
-		line := reader.Text()
-		utils.SetLine(line.Number)
-		result += cmdvh.ParseCmd(&reader, line) + "\n"
+		if strings.HasPrefix(trimmed, "#") {
+			// 줄 전체가 주석이면 무시
+			continue
+		}
+		result = append(result, line)
 	}
 
-	return result
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
+
+	return strings.Join(result, "\n")
+}
+
+func Parse(target_path string) {
+
+	fmt.Println(target_path)
+	data := utils.Must(os.ReadFile(target_path))
+	code := removeLineComments(string(data))
+
+	tokens := tokenizer.Tokenize(code)
+	for _, tok := range tokens {
+		fmt.Println(tok)
+	}
+
+	newLexer := lexer.New(tokens)
+	ast, err := newLexer.Lexicalize()
+	if err != nil {
+		switch typedErr := err.(type) {
+		case *perr.TokenError:
+			panic(fmt.Sprintf("%s at %d~%d", typedErr, typedErr.Begin, typedErr.End))
+		default:
+			panic(typedErr)
+		}
+	}
+
+	printTree(ast, 0)
+	err = astparser.Parse(ast)
+	if err != nil {
+		switch typedErr := err.(type) {
+		case *perr.TokenError:
+			panic(fmt.Sprintf("%s at %d~%d", typedErr, typedErr.Begin, typedErr.End))
+		default:
+			panic(typedErr)
+		}
+	}
 }
