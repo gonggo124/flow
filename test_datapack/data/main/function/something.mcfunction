@@ -1,11 +1,10 @@
 #> COMPILED BY FLOW
-scoreboard players operation #sa0 _flow_internal.register = #baseptr _flow_internal.register
-scoreboard players operation #baseptr _flow_internal.register = #stackptr _flow_internal.register
+execute as 6a56ec26-fbbd-4b1c-a7bf-59d89fd54460 on vehicle run tag @s add _flow_internal.stack.old_baseptr
+scoreboard players set #sa0 _flow_internal.register 0
 function _flow_internal:mem/stack/push
-scoreboard players operation #t0 _flow_internal.register = #baseptr _flow_internal.register
-scoreboard players remove #t0 _flow_internal.register 1
-execute as @e[tag=_flow_internal.stack.bit,type=marker,limit=1] if score @s _flow_internal.bitaddr = #t0 _flow_internal.register run scoreboard players operation #return _flow_internal.register = @s _flow_internal.stack
-scoreboard players operation #stackptr _flow_internal.register = #baseptr _flow_internal.register
-execute as @e[tag=_flow_internal.stack.bit,type=marker,limit=1] if score @s _flow_internal.bitaddr = #stackptr _flow_internal.register run scoreboard players operation #baseptr _flow_internal.register = @s _flow_internal.stack
-function _flow_internal:mem/stack/cut
+execute as de8d7920-b907-4853-b3a2-c73cb0d5a84d on vehicle run function _flow_internal:mem/stack/baseptr/attach
+execute as 6a56ec26-fbbd-4b1c-a7bf-59d89fd54460 on vehicle on vehicle run scoreboard players operation #return _flow_internal.register = @s _flow_internal.stack
+execute as 6a56ec26-fbbd-4b1c-a7bf-59d89fd54460 on vehicle run function _flow_internal:mem/stack/stackptr/attach
+execute as 6a56ec26-fbbd-4b1c-a7bf-59d89fd54460 on vehicle run function _flow_internal:mem/stack/ret
+execute as de8d7920-b907-4853-b3a2-c73cb0d5a84d on vehicle run function _flow_internal:mem/stack/cut
 return 1

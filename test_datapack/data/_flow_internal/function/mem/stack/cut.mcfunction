@@ -1,4 +1,6 @@
 #>Params
 ##stackptr register
 
-execute as @e[tag=_flow_internal.stack.bit,type=marker] if score @s _flow_internal.bitaddr >= #stackptr _flow_internal.register run kill @s
+kill @s
+                                 # stackptr, baseptr 거르기
+execute on passengers if entity @s[tag=_flow_internal.stack.bit] run function _flow_internal:mem/stack/cut

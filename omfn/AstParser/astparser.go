@@ -50,9 +50,9 @@ func readTree(ast lexer.Node) {
 		writer := bufio.NewWriter(new_file)
 
 		endFunc := func() {
-			writer.WriteString("scoreboard players operation #stackptr _flow_internal.register = #baseptr _flow_internal.register\n")
-			writer.WriteString("execute as @e[tag=_flow_internal.stack.bit,type=marker,limit=1] if score @s _flow_internal.bitaddr = #stackptr _flow_internal.register run scoreboard players operation #baseptr _flow_internal.register = @s _flow_internal.stack\n")
-			writer.WriteString("function " + os.Getenv("INT_NS") + ":mem/stack/cut\n")
+			writer.WriteString("execute as 6a56ec26-fbbd-4b1c-a7bf-59d89fd54460 on vehicle run function " + os.Getenv("INT_NS") + ":mem/stack/stackptr/attach\n")
+			writer.WriteString("execute as 6a56ec26-fbbd-4b1c-a7bf-59d89fd54460 on vehicle run function " + os.Getenv("INT_NS") + ":mem/stack/ret\n")
+			writer.WriteString("execute as de8d7920-b907-4853-b3a2-c73cb0d5a84d on vehicle run function " + os.Getenv("INT_NS") + ":mem/stack/cut\n")
 		}
 
 		writer.WriteString("#> COMPILED BY FLOW\n")
@@ -73,18 +73,20 @@ func readTree(ast lexer.Node) {
 				return errors.New("존재하지 않는 변수입니다")
 			}
 
-			operator := "add"
-			operand := tVar.Offset
-			if strings.HasPrefix(tVar.Offset, "-") {
-				operator = "remove"
-				operand = strings.TrimPrefix(tVar.Offset, "-")
+			operand := "on passengers "
+			suffix := "if entity @s[tag=_flow_internal.stack.bit,type=marker] "
+			offset, err := strconv.Atoi(tVar.Offset)
+			if err != nil {
+				panic(err)
 			}
-			writer.WriteString("scoreboard players operation #t0 _flow_internal.register = #baseptr _flow_internal.register\n")
-			writer.WriteString("scoreboard players " + operator + " #t0 _flow_internal.register " + operand + "\n")
-
-			writer.WriteString("execute ")
-			writer.WriteString("as @e[tag=_flow_internal.stack.bit,type=marker,limit=1] ")
-			writer.WriteString("if score @s _flow_internal.bitaddr = #t0 _flow_internal.register ")
+			if offset < 0 {
+				offset = -offset
+				operand = "on vehicle "
+				suffix = ""
+			}
+			writer.WriteString("execute as 6a56ec26-fbbd-4b1c-a7bf-59d89fd54460 on vehicle ")
+			writer.WriteString(strings.Repeat(operand, offset))
+			writer.WriteString(suffix)
 			writer.WriteString("run scoreboard players operation " + tt + " = @s _flow_internal.stack")
 			writer.WriteString("\n")
 
@@ -95,9 +97,12 @@ func readTree(ast lexer.Node) {
 			varOffsetTable[param.Name] = Variable{Type: param.Value, Offset: strconv.Itoa(-(idx + 1))}
 		}
 
-		writer.WriteString("scoreboard players operation #sa0 _flow_internal.register = #baseptr _flow_internal.register\n")
-		writer.WriteString("scoreboard players operation #baseptr _flow_internal.register = #stackptr _flow_internal.register\n")
+		writer.WriteString("execute as 6a56ec26-fbbd-4b1c-a7bf-59d89fd54460 on vehicle run tag @s add _flow_internal.stack.old_baseptr\n")
+
+		writer.WriteString("scoreboard players set #sa0 _flow_internal.register 0\n")
 		writer.WriteString("function " + os.Getenv("INT_NS") + ":mem/stack/push\n")
+
+		writer.WriteString("execute as de8d7920-b907-4853-b3a2-c73cb0d5a84d on vehicle run function " + os.Getenv("INT_NS") + ":mem/stack/baseptr/attach\n")
 
 		last_return := false
 		for _, stuff := range ast.Body[2].Body {
@@ -122,7 +127,9 @@ func readTree(ast lexer.Node) {
 					}
 				}
 				writer.WriteString("function " + os.Getenv("MAIN_NS") + ":" + stuff.Name + "\n")
-				writer.WriteString("scoreboard players remove #stackptr _flow_internal.register " + strconv.Itoa(len(stuff.Body[0].Body)) + "\n")
+				writer.WriteString("execute as de8d7920-b907-4853-b3a2-c73cb0d5a84d on vehicle ")
+				writer.WriteString(strings.Repeat("on vehicle ", len(stuff.Body[0].Body)))
+				writer.WriteString("run function " + os.Getenv("INT_NS") + ":mem/stack/stackptr/attach\n")
 				writer.WriteString("function " + os.Getenv("INT_NS") + ":mem/stack/cut\n")
 			}
 			if stuff.Type == lexer.VARIABLE_DECLARATION {
@@ -147,7 +154,8 @@ func readTree(ast lexer.Node) {
 				}
 				if stuff.Body[0].Type == lexer.NUMBER {
 					endFunc()
-					writer.WriteString("return " + stuff.Body[0].Value + "\n")
+					writer.WriteString("scoreboard players set #return _flow_internal.register " + stuff.Body[0].Value)
+					writer.WriteString("return 1\n")
 				}
 				if stuff.Body[0].Type == lexer.IDENTIFIER {
 					err := loadId(stuff.Body[0], "#return _flow_internal.register")
