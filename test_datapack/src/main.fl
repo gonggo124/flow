@@ -1,8 +1,8 @@
 void main() {
-    int a = 120;
-    something(a,169);
+    int a = 3+func+3;
+    something(3+5*7,1+2);
 }
 
-void something(int a,int b) {
-    return a;
+void something() {
+    return 10;
 }

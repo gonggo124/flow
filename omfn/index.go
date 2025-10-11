@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	utils "flow/Utils"
-	astparser "flow/omfn/AstParser"
 	lexer "flow/omfn/Lexer"
 	perr "flow/omfn/ParseErrors"
 	tokenizer "flow/omfn/Tokenizer"
@@ -39,7 +38,7 @@ func removeLineComments(src string) string {
 		line := scanner.Text()
 		trimmed := strings.TrimSpace(line)
 
-		if strings.HasPrefix(trimmed, "#") {
+		if strings.HasPrefix(trimmed, "//") {
 			// 줄 전체가 주석이면 무시
 			continue
 		}
@@ -76,13 +75,13 @@ func Parse(target_path string) {
 	}
 
 	printTree(ast, 0)
-	err = astparser.Parse(ast)
-	if err != nil {
-		switch typedErr := err.(type) {
-		case *perr.TokenError:
-			panic(fmt.Sprintf("%s at %d~%d", typedErr, typedErr.Begin, typedErr.End))
-		default:
-			panic(typedErr)
-		}
-	}
+	// err = astparser.Parse(ast)
+	// if err != nil {
+	// 	switch typedErr := err.(type) {
+	// 	case *perr.TokenError:
+	// 		panic(fmt.Sprintf("%s at %d~%d", typedErr, typedErr.Begin, typedErr.End))
+	// 	default:
+	// 		panic(typedErr)
+	// 	}
+	// }
 }

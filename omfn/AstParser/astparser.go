@@ -127,10 +127,12 @@ func readTree(ast lexer.Node) {
 					}
 				}
 				writer.WriteString("function " + os.Getenv("MAIN_NS") + ":" + stuff.Name + "\n")
-				writer.WriteString("execute as de8d7920-b907-4853-b3a2-c73cb0d5a84d on vehicle ")
-				writer.WriteString(strings.Repeat("on vehicle ", len(stuff.Body[0].Body)))
-				writer.WriteString("run function " + os.Getenv("INT_NS") + ":mem/stack/stackptr/attach\n")
-				writer.WriteString("function " + os.Getenv("INT_NS") + ":mem/stack/cut\n")
+				if len(stuff.Body[0].Body) != 0 {
+					writer.WriteString("execute as de8d7920-b907-4853-b3a2-c73cb0d5a84d on vehicle ")
+					writer.WriteString(strings.Repeat("on vehicle ", len(stuff.Body[0].Body)))
+					writer.WriteString("run function " + os.Getenv("INT_NS") + ":mem/stack/stackptr/attach\n")
+					writer.WriteString("function " + os.Getenv("INT_NS") + ":mem/stack/cut\n")
+				}
 			}
 			if stuff.Type == lexer.VARIABLE_DECLARATION {
 				if stuff.Value != "int" {
@@ -154,7 +156,7 @@ func readTree(ast lexer.Node) {
 				}
 				if stuff.Body[0].Type == lexer.NUMBER {
 					endFunc()
-					writer.WriteString("scoreboard players set #return _flow_internal.register " + stuff.Body[0].Value)
+					writer.WriteString("scoreboard players set #return _flow_internal.register " + stuff.Body[0].Value + "\n")
 					writer.WriteString("return 1\n")
 				}
 				if stuff.Body[0].Type == lexer.IDENTIFIER {

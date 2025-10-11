@@ -25,6 +25,7 @@ const (
 	EQUAL
 	RAWLINE
 	RETURN
+	OPERATOR
 	UNKNOWN
 	EOF
 )
@@ -68,6 +69,8 @@ func TokTypeToString(tok TokenType) string {
 		return "EOF"
 	case RETURN:
 		return "RETURN"
+	case OPERATOR:
+		return "OPERATOR"
 	default:
 		return "UNEXPECTED TOKEN"
 	}
@@ -120,7 +123,7 @@ func Tokenize(tCode string) []Token {
 			return
 		}
 		switch current {
-		case "int", "string", "void":
+		case "int", "void", "selector":
 			pushToken(newToken(TYPE, current))
 		case "return":
 			pushToken(newToken(RETURN, current))
@@ -158,7 +161,7 @@ func Tokenize(tCode string) []Token {
 			continue
 		}
 		switch chr {
-		case '/':
+		case '`':
 			emptyCurrent()
 			inRawLine = true
 		case '"':
@@ -188,6 +191,9 @@ func Tokenize(tCode string) []Token {
 		case ';':
 			emptyCurrent()
 			pushToken(newToken(SEMICOLON, string(chr)))
+		case '+', '-', '*', '/':
+			emptyCurrent()
+			pushToken(newToken(OPERATOR, string(chr)))
 		default:
 			if unicode.IsSpace(chr) {
 				if current == "" {

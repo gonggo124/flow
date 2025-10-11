@@ -3,6 +3,7 @@ package lexer
 import (
 	perr "flow/omfn/ParseErrors"
 	tok "flow/omfn/Tokenizer"
+	"fmt"
 )
 
 type NodeType int
@@ -12,6 +13,9 @@ const (
 	FUNCTION_DEFINITION           // field: Body
 	VARIABLE_DECLARATION          // field: Name, Value, Body
 	CALL_EXPRESSION               // field: Body
+	BINARY_EXPRESSION             // field: Body
+	LITERAL_EXPRESSION            // field: Body
+	OPERATOR                      // field: Value
 	NUMBER                        // field: Value
 	SELECTOR                      // field: Value
 	STRING                        // field: Value
@@ -47,7 +51,11 @@ func (lexer *Lexer) cur() tok.Token {
 
 func (lexer *Lexer) next(i int) tok.Token {
 	if lexer.idx+i >= lexer.length {
-		return tok.Token{Type: tok.UNKNOWN, Value: ""}
+		panic(&perr.TokenError{
+			Begin: lexer.cur().Begin,
+			End:   lexer.cur().End,
+			Msg:   "토큰을 예상했으나 EOF",
+		})
 	}
 	return lexer.tokens[lexer.idx+i]
 }
@@ -94,6 +102,7 @@ func (lexer *Lexer) expect(t tok.TokenType) {
 }
 
 func (lexer *Lexer) argumentList() (returnNode Node, returnErr error) {
+	fmt.Println("OK")
 	newNode := Node{}
 	newNode.Type = ARGUMENT_LIST
 
@@ -111,24 +120,12 @@ func (lexer *Lexer) argumentList() (returnNode Node, returnErr error) {
 
 	for lexer.cur().Type != tok.RPAREN {
 
-		switch lexer.cur().Type {
-		case tok.IDENTIFIER:
-			newNode.Body = append(newNode.Body, Node{Type: IDENTIFIER, Name: lexer.cur().Value})
-		case tok.NUMBER:
-			newNode.Body = append(newNode.Body, Node{Type: NUMBER, Value: lexer.cur().Value})
-		case tok.STRING:
-			newNode.Body = append(newNode.Body, Node{Type: STRING, Value: lexer.cur().Value})
-		case tok.SELECTOR:
-			newNode.Body = append(newNode.Body, Node{Type: SELECTOR, Value: lexer.cur().Value})
-		default:
-			panic(&perr.TokenError{
-				Begin: lexer.cur().Begin,
-				End:   lexer.cur().End,
-				Msg:   perr.UnexpectedToken(lexer.cur().Value, "'식별자', '숫자', '문자열', '선택자'를 예상함"),
-			})
+		newExpr, err := lexer.expression([]tok.TokenType{tok.COMMA, tok.RPAREN})
+		if err != nil {
+			panic(err)
 		}
+		newNode.Body = append(newNode.Body, newExpr)
 
-		lexer.advance()
 		if lexer.cur().Type == tok.RPAREN {
 			break
 		}
@@ -378,7 +375,200 @@ func (lexer *Lexer) functionDefinition() (returnNode Node, returnErr error) {
 	return
 }
 
-func (lexer *Lexer) variableAssignment() (returnNode Node, returnErr error) {
+// func (lexer *Lexer) variableAssignment() (returnNode Node, returnErr error) {
+// 	newNode := Node{}
+// 	newNode.Type = VARIABLE_DECLARATION
+
+// 	defer func() {
+// 		returnNode = newNode
+// 		returnErr = nil
+// 		if r := recover(); r != nil {
+// 			if e, ok := r.(error); ok {
+// 				returnErr = e // paniced error를 반환
+// 			}
+// 		}
+// 	}()
+
+// 	newNode.Begin = lexer.cur().Begin
+// 	newNode.Name = lexer.eat(tok.IDENTIFIER).Value
+// 	lexer.eat(tok.EQUAL)
+
+// 	for {
+
+// 		switch lexer.cur().Type {
+// 		case tok.IDENTIFIER:
+// 			newNode.Body = append(newNode.Body, Node{Type: IDENTIFIER, Name: lexer.cur().Value})
+// 		case tok.NUMBER:
+// 			newNode.Body = append(newNode.Body, Node{Type: NUMBER, Value: lexer.cur().Value})
+// 		case tok.STRING:
+// 			newNode.Body = append(newNode.Body, Node{Type: STRING, Value: lexer.cur().Value})
+// 		case tok.SELECTOR:
+// 			newNode.Body = append(newNode.Body, Node{Type: SELECTOR, Value: lexer.cur().Value})
+// 		default:
+// 			panic(&perr.TokenError{
+// 				Begin: lexer.cur().Begin,
+// 				End:   lexer.cur().End,
+// 				Msg:   perr.UnexpectedToken(lexer.cur().Value, "식별자, 숫자, 문자열, 선택자"),
+// 			})
+// 		}
+
+// 		lexer.advance()
+
+// 		if lexer.cur().Type == tok.SEMICOLON {
+// 			newNode.End = lexer.cur().End
+// 			lexer.advance()
+// 			break
+// 		}
+// 		if lexer.cur().Type == tok.EOF {
+// 			panic(&perr.TokenError{
+// 				Begin: lexer.cur().Begin,
+// 				End:   lexer.cur().End,
+// 				Msg:   perr.UnexpectedToken(lexer.cur().Value, "';'를 예상함"),
+// 			})
+// 		}
+// 	}
+
+// 	return
+// }
+
+func (lexer *Lexer) expression(end_toks []tok.TokenType) (returnNode Node, returnErr error) {
+	newNode := Node{}
+	// newNode.Type =
+
+	defer func() {
+		returnNode = newNode
+		returnErr = nil
+		if r := recover(); r != nil {
+			if e, ok := r.(error); ok {
+				returnErr = e // paniced error를 반환
+			}
+		}
+	}()
+
+	check_operand := func(t Node) Node {
+		if t.Type != NUMBER && t.Type != SELECTOR && t.Type != BINARY_EXPRESSION && t.Type != CALL_EXPRESSION && t.Type != IDENTIFIER {
+			panic(&perr.TokenError{
+				Begin: t.Begin,
+				End:   t.End,
+				Msg:   "숫자, 선택자, 변수, 함수를 예상했으나 '" + t.Value + "'을 찾음",
+			})
+		}
+		return t
+	}
+	check_op := func(t Node) Node {
+		if t.Type != OPERATOR {
+			panic(&perr.TokenError{
+				Begin: t.Begin,
+				End:   t.End,
+				Msg:   "연산자를 예상했으나 '" + t.Value + "'을 찾음",
+			})
+		}
+		return t
+	}
+	tok_to_node := func(t tok.Token) Node {
+		switch t.Type {
+		case tok.OPERATOR:
+			return Node{
+				Type:  OPERATOR,
+				Value: lexer.cur().Value,
+				Begin: t.Begin,
+				End:   t.End,
+			}
+		case tok.NUMBER:
+			return Node{
+				Type:  NUMBER,
+				Value: lexer.cur().Value,
+				Begin: t.Begin,
+				End:   t.End,
+			}
+		case tok.SELECTOR:
+			return Node{
+				Type:  SELECTOR,
+				Value: lexer.cur().Value,
+				Begin: t.Begin,
+				End:   t.End,
+			}
+		case tok.IDENTIFIER:
+			if lexer.next(1).Type == tok.LPAREN {
+				newCallExpr, err := lexer.callExpression()
+				if err != nil {
+					panic(err)
+				}
+				lexer.idx--
+				return newCallExpr
+			}
+			return Node{
+				Type:  IDENTIFIER,
+				Name:  lexer.cur().Value,
+				Begin: t.Begin,
+				End:   t.End,
+			}
+		}
+		panic(&perr.TokenError{
+			Begin: t.Begin,
+			End:   t.End,
+			Msg:   perr.UnexpectedToken(tok.TokTypeToString(t.Type), "숫자, 선택자, 변수, 함수, 연산자"),
+		})
+	}
+
+	is_end := func(t tok.Token) bool {
+		for _, ttt := range end_toks {
+			if ttt == t.Type {
+				return true
+			}
+		}
+		return false
+	}
+
+	exprs := make([]Node, 0)
+
+	for !is_end(lexer.cur()) {
+		if lexer.cur().Type == tok.EOF {
+			panic(&perr.TokenError{
+				Begin: lexer.cur().Begin,
+				End:   lexer.cur().End,
+				Msg:   perr.UnexpectedToken(lexer.cur().Value, "';'를 예상함"),
+			})
+		}
+		exprs = append(exprs, tok_to_node(lexer.cur()))
+		lexer.advance()
+	}
+
+	idx := 0
+	turn := true
+	for len(exprs) > 2 {
+		if turn && len(exprs)-idx < 3 {
+			turn = false
+			idx = 0
+		}
+		fmt.Println(exprs, turn, idx)
+		op1 := check_operand(exprs[idx])
+		opr := check_op(exprs[idx+1])
+		op2 := check_operand(exprs[idx+2])
+		if turn && opr.Value != "*" && opr.Value != "/" {
+			idx += 2
+		} else {
+			if idx+3 >= len(exprs) {
+				exprs = exprs[:idx]
+			} else {
+				exprs = append(exprs[:idx], exprs[idx+3:]...)
+			}
+			exprs = append(exprs[:idx+1], exprs[idx:]...)
+			exprs[idx] = Node{
+				Type: BINARY_EXPRESSION,
+				Body: []Node{op1, opr, op2},
+			}
+			idx = 0
+		}
+
+	}
+
+	newNode = exprs[0]
+
+	return
+}
+
+func (lexer *Lexer) variableDeclaration() (returnNode Node, returnErr error) {
 	newNode := Node{}
 	newNode.Type = VARIABLE_DECLARATION
 
@@ -397,60 +587,45 @@ func (lexer *Lexer) variableAssignment() (returnNode Node, returnErr error) {
 	newNode.Name = lexer.eat(tok.IDENTIFIER).Value
 	lexer.eat(tok.EQUAL)
 
-	for {
-
-		switch lexer.cur().Type {
-		case tok.IDENTIFIER:
-			newNode.Body = append(newNode.Body, Node{Type: IDENTIFIER, Name: lexer.cur().Value})
-		case tok.NUMBER:
-			newNode.Body = append(newNode.Body, Node{Type: NUMBER, Value: lexer.cur().Value})
-		case tok.STRING:
-			newNode.Body = append(newNode.Body, Node{Type: STRING, Value: lexer.cur().Value})
-		case tok.SELECTOR:
-			newNode.Body = append(newNode.Body, Node{Type: SELECTOR, Value: lexer.cur().Value})
-		default:
-			panic(&perr.TokenError{
-				Begin: lexer.cur().Begin,
-				End:   lexer.cur().End,
-				Msg:   perr.UnexpectedToken(lexer.cur().Value, "식별자, 숫자, 문자열, 선택자"),
-			})
-		}
-
-		lexer.advance()
-
-		if lexer.cur().Type == tok.SEMICOLON {
-			newNode.End = lexer.cur().End
-			lexer.advance()
-			break
-		}
-		if lexer.cur().Type == tok.EOF {
-			panic(&perr.TokenError{
-				Begin: lexer.cur().Begin,
-				End:   lexer.cur().End,
-				Msg:   perr.UnexpectedToken(lexer.cur().Value, "';'를 예상함"),
-			})
-		}
+	newExpr, err := lexer.expression([]tok.TokenType{tok.SEMICOLON})
+	if err != nil {
+		panic(err)
 	}
+	newNode.Body = append(newNode.Body, newExpr)
+
+	lexer.eat(tok.SEMICOLON)
 
 	return
 }
 
-func (lexer *Lexer) typeSpecifier() (Node, error) {
+func (lexer *Lexer) typeSpecifier() (returnNode Node, returnErr error) {
+	newNode := Node{}
+
+	defer func() {
+		returnNode = newNode
+		returnErr = nil
+		if r := recover(); r != nil {
+			if e, ok := r.(error); ok {
+				returnErr = e // paniced error를 반환
+			}
+		}
+	}()
 
 	if lexer.next(1).Type == tok.IDENTIFIER &&
 		lexer.next(2).Type == tok.EQUAL {
-		newNode, err := lexer.variableAssignment()
+		newDec, err := lexer.variableDeclaration()
 		if err != nil {
-			return newNode, err
+			panic(err)
 		}
-		return newNode, nil
+		newNode = newDec
+		return
 	}
 
-	return Node{}, &perr.TokenError{
+	panic(&perr.TokenError{
 		Begin: lexer.cur().Begin,
 		End:   lexer.cur().End,
 		Msg:   "알 수 없는 구조의 코드",
-	}
+	})
 }
 
 func (lexer *Lexer) Lexicalize() (Node, error) {
