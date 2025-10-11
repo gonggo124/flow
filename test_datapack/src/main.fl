@@ -1,8 +1,6 @@
 void main() {
-    int a = 3+func+3;
-    something(3+5*7,1+2);
-}
-
-void something() {
-    return 10;
+    int var = 10;
+    var=20;
+    int a = (3+5)*var;
+    something();
 }
