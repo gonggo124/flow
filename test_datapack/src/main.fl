@@ -1,6 +1,12 @@
+void something();
+
 void main() {
     int var = 10;
     var=20;
     int a = (3+5)*var;
     something();
+}
+
+void something() {
+    // 함수 내용
 }

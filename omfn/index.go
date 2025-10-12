@@ -10,11 +10,15 @@ import (
 	lexer "flow/omfn/Lexer"
 	perr "flow/omfn/ParseErrors"
 	tokenizer "flow/omfn/Tokenizer"
+	typechecker "flow/omfn/TypeChecker"
 )
 
 func printTree(ast lexer.Node, depth int) {
 	fmt.Print(strings.Repeat("    ", depth))
-	fmt.Print("[" + fmt.Sprintf("%d", ast.Type) + "]\n")
+	fmt.Printf("[%d]", ast.Type)
+	fmt.Print(":" + ast.DataType)
+	fmt.Printf(" %d~%d\n", ast.Begin, ast.End)
+
 	if ast.Name != "" {
 		fmt.Print(strings.Repeat("    ", depth))
 		fmt.Print("    Name: '", ast.Name, "'\n")
@@ -65,6 +69,16 @@ func Parse(target_path string) {
 
 	newLexer := lexer.New(tokens)
 	ast, err := newLexer.Lexicalize()
+	if err != nil {
+		switch typedErr := err.(type) {
+		case *perr.TokenError:
+			panic(fmt.Sprintf("%s at %d~%d", typedErr, typedErr.Begin, typedErr.End))
+		default:
+			panic(typedErr)
+		}
+	}
+
+	err = typechecker.Annotate(&ast)
 	if err != nil {
 		switch typedErr := err.(type) {
 		case *perr.TokenError:

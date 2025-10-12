@@ -180,6 +180,7 @@ func readTree(ast lexer.Node) {
 		}
 
 		writer.Flush() // 버퍼 비우기
+		return
 	}
 	for _, node := range ast.Body {
 		readTree(node)

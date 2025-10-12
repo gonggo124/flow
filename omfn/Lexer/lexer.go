@@ -10,8 +10,9 @@ type NodeType int
 
 const (
 	ROOT                  NodeType = iota
-	FUNCTION_DEFINITION            // field: Body
-	VARIABLE_DECLARATION           // field: Name, Value, Body
+	FUNCTION_DEFINITION            // field: Body, Value as ReturnType
+	FUNCTION_DECLARATION           // field: Body, Value as ReturnType
+	VARIABLE_DECLARATION           // field: Body, Name, Value as VariableType
 	CALL_EXPRESSION                // field: Body
 	BINARY_EXPRESSION              // field: Body
 	ASSIGNMENT_EXPRESSION          // field: Body
@@ -23,7 +24,6 @@ const (
 	IDENTIFIER                     // field: Name
 	PARAM_LIST                     // field: Body
 	PARAM                          // field: Name, Value as ParamType
-	TYPE                           // field: Value
 	COMPOUND_STATEMENT             // field: Body
 	ARGUMENT_LIST                  // field: Body
 	RAWLINE                        // field: Value
@@ -104,7 +104,6 @@ func (lexer *Lexer) expect(t tok.TokenType) {
 }
 
 func (lexer *Lexer) argumentList() (returnNode Node, returnErr error) {
-	fmt.Println("OK")
 	newNode := Node{}
 	newNode.Type = ARGUMENT_LIST
 
@@ -183,7 +182,7 @@ func (lexer *Lexer) parameterList() (returnNode Node, returnErr error) {
 		lexer.eat(tok.COMMA)
 	}
 
-	newNode.Begin = lexer.eat(tok.RPAREN).Begin
+	newNode.End = lexer.eat(tok.RPAREN).End
 
 	return
 }
@@ -363,7 +362,7 @@ func (lexer *Lexer) functionDefinition() (returnNode Node, returnErr error) {
 
 	lexer.expect(tok.TYPE)
 	newNode.Begin = lexer.cur().Begin
-	newNode.Body = append(newNode.Body, Node{Type: TYPE, Value: lexer.cur().Value}) // 함수 반환 타입
+	newNode.Value = lexer.cur().Value // 함수 반환 타입
 	lexer.advance()
 
 	lexer.expect(tok.IDENTIFIER)
@@ -377,11 +376,18 @@ func (lexer *Lexer) functionDefinition() (returnNode Node, returnErr error) {
 	}
 	newNode.Body = append(newNode.Body, paramNode)
 
+	if lexer.cur().Type == tok.SEMICOLON {
+		lexer.eat(tok.SEMICOLON)
+		newNode.Type = FUNCTION_DECLARATION
+		return
+	}
+
 	compoundNode, err := lexer.compoundStatement()
 	if err != nil {
 		panic(err)
 	}
 	newNode.Body = append(newNode.Body, compoundNode)
+
 	return
 }
 
@@ -576,7 +582,7 @@ func (lexer *Lexer) variableDeclaration() (returnNode Node, returnErr error) {
 	}
 	newNode.Body = append(newNode.Body, newExpr)
 
-	lexer.eat(tok.SEMICOLON)
+	newNode.End = lexer.eat(tok.SEMICOLON).End
 
 	return
 }
@@ -605,7 +611,7 @@ func (lexer *Lexer) variableAssignment() (returnNode Node, returnErr error) {
 	}
 	newNode.Body = append(newNode.Body, newExpr)
 
-	lexer.eat(tok.SEMICOLON)
+	newNode.End = lexer.eat(tok.SEMICOLON).End
 
 	return
 }

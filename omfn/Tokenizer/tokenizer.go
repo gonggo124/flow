@@ -123,7 +123,7 @@ func Tokenize(tCode string) []Token {
 			return
 		}
 		switch current {
-		case "int", "void", "selector":
+		case "int", "void", "selector", "string":
 			pushToken(newToken(TYPE, current))
 		case "return":
 			pushToken(newToken(RETURN, current))
