@@ -4,6 +4,19 @@
 scoreboard objectives add _flow_internal.register dummy
 ## 스택 전용 레지스터
 
+#(1-2)-(3-(4-5))
+#a=1
+#b=2
+#a-=b
+#temp0=a
+#a=4
+#b=5
+#a-=b
+#temp1=a
+#a=3
+#a-=temp1
+#temp0=a
+
 ## 시스템 함수
 # 인자 전달 레지스터
 scoreboard players set #sa0 _flow_internal.register 0
@@ -16,6 +29,11 @@ scoreboard players set #a0 _flow_internal.register 0
 scoreboard players set #return _flow_internal.register 0
 ## 임시 레지스터
 scoreboard players set #t0 _flow_internal.register 0
+
+## 범용 레지스터
+scoreboard players set #r1 _flow_internal.register 0
+scoreboard players set #r2 _flow_internal.register 0
+# scoreboard players set #r3 _flow_internal.register 0
 
 ## # 포인터 소환 #
 # stackptr `de8d7920-b907-4853-b3a2-c73cb0d5a84d`

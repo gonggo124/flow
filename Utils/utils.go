@@ -26,10 +26,13 @@ func FileName(name string) string {
 	return namearr[0]
 }
 
-var ct uint // 카운터 변수
-func Count() uint {
-	current := ct
-	ct++
+type Counter struct {
+	cnt int
+}
+
+func (c *Counter) Count() int {
+	current := c.cnt
+	c.cnt++
 	return current
 }
 

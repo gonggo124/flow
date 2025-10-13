@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	utils "flow/Utils"
+	astparser "flow/omfn/AstParser"
 	lexer "flow/omfn/Lexer"
 	perr "flow/omfn/ParseErrors"
 	tokenizer "flow/omfn/Tokenizer"
@@ -89,13 +90,14 @@ func Parse(target_path string) {
 	}
 
 	printTree(ast, 0)
-	// err = astparser.Parse(ast)
-	// if err != nil {
-	// 	switch typedErr := err.(type) {
-	// 	case *perr.TokenError:
-	// 		panic(fmt.Sprintf("%s at %d~%d", typedErr, typedErr.Begin, typedErr.End))
-	// 	default:
-	// 		panic(typedErr)
-	// 	}
-	// }
+	parser := astparser.New()
+	err = parser.Parse(ast)
+	if err != nil {
+		switch typedErr := err.(type) {
+		case *perr.TokenError:
+			panic(fmt.Sprintf("%s at %d~%d", typedErr, typedErr.Begin, typedErr.End))
+		default:
+			panic(typedErr)
+		}
+	}
 }
