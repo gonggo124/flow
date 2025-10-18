@@ -142,7 +142,7 @@ func Tokenize(tCode string) []Token {
 				pushToken(newToken(RAWLINE, current))
 				continue
 			}
-			fmt.Println(string(chr), chr, "FUCK?")
+			fmt.Println(string(chr), chr)
 			current += string(chr)
 			continue
 		}

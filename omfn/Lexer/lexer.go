@@ -332,7 +332,12 @@ func (lexer *Lexer) compoundStatement() (returnNode Node, returnErr error) {
 		}
 
 		if lexer.cur().Type == tok.RAWLINE {
-			newNode.Body = append(newNode.Body, Node{Type: RAWLINE, Value: lexer.cur().Value})
+			newNode.Body = append(newNode.Body, Node{
+				Type: RAWLINE,
+				Value: lexer.cur().Value,
+				Begin: lexer.cur().Begin,
+				End: lexer.cur().End,
+			})
 			lexer.advance()
 		}
 	}

@@ -59,7 +59,7 @@ func (p *Parser) loadId(target lexer.Node, tt string) (string, error) {
 	}
 
 	operand := "on passengers "
-	suffix := "if entity @s[tag=_flow_internal.stack.bit,type=marker] "
+	suffix := "if entity @s[tag=_flow_internal.stack.bit,type=interaction] "
 	offset, err := strconv.Atoi(tVar.Offset)
 	if err != nil {
 		panic(err)
@@ -133,15 +133,37 @@ func (p *Parser) binaryExpression(stuff *lexer.Node, cnt int, resultR string) st
 	op1Reg := cntReg()
 	op2Reg := cntReg()
 
-	if operand1.Type == lexer.BINARY_EXPRESSION {
+	switch operand1.Type {
+	case lexer.BINARY_EXPRESSION:
 		writer.WriteString(p.binaryExpression(&operand1, cnt, op1Reg))
-	} else {
+	case lexer.NUMBER:
 		writer.WriteString("scoreboard players set " + op1Reg + " _flow_internal.register " + operand1.Value + "\n")
+	case lexer.IDENTIFIER:
+		loadedResult, err := p.loadId(operand1,op1Reg+" _flow_internal.register")
+		if err != nil {
+			panic(&perr.TokenError{
+				Begin: operand1.Begin,
+				End:   operand1.End,
+				Msg:   "존재하지 않는 변수입니다",
+			})
+		}
+		writer.WriteString(loadedResult)
 	}
-	if operand2.Type == lexer.BINARY_EXPRESSION {
+	switch operand2.Type {
+	case lexer.BINARY_EXPRESSION:
 		writer.WriteString(p.binaryExpression(&operand2, cnt, op2Reg))
-	} else {
+	case lexer.NUMBER:
 		writer.WriteString("scoreboard players set " + op2Reg + " _flow_internal.register " + operand2.Value + "\n")
+	case lexer.IDENTIFIER:
+		loadedResult, err := p.loadId(operand2,op2Reg+" _flow_internal.register")
+		if err != nil {
+			panic(&perr.TokenError{
+				Begin: operand2.Begin,
+				End:   operand2.End,
+				Msg:   "존재하지 않는 변수입니다",
+			})
+		}
+		writer.WriteString(loadedResult)
 	}
 
 	if resultR == "" {
@@ -186,7 +208,7 @@ func (p *Parser) variableAssignment(stuff *lexer.Node) string {
 	}
 
 	operand := "on passengers "
-	suffix := "if entity @s[tag=_flow_internal.stack.bit,type=marker] "
+	suffix := "if entity @s[tag=_flow_internal.stack.bit,type=interaction] "
 	offset, err := strconv.Atoi(tVar.Offset)
 	if err != nil {
 		panic(err)
@@ -280,6 +302,9 @@ func (p *Parser) functionDefinition(ast *lexer.Node) {
 		}
 		if stuff.Type == lexer.RETURN_EXPRESSION {
 			writer.WriteString(p.returnExprssion(&stuff))
+		}
+		if stuff.Type == lexer.RAWLINE {
+			writer.WriteString(stuff.Value+"\n")
 		}
 	}
 
