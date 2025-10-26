@@ -16,6 +16,7 @@ const (
 	CALL_EXPRESSION                // field: Body
 	BINARY_EXPRESSION              // field: Body
 	ASSIGNMENT_EXPRESSION          // field: Body
+	IF_STATEMENT		       // field: Body
 	LITERAL_EXPRESSION             // field: Body
 	OPERATOR                       // field: Value
 	NUMBER                         // field: Value
@@ -309,6 +310,14 @@ func (lexer *Lexer) compoundStatement() (returnNode Node, returnErr error) {
 
 		if lexer.cur().Type == tok.IDENTIFIER && lexer.next(1).Type == tok.EQUAL {
 			newAssignNode, err := lexer.variableAssignment()
+			if err != nil {
+				panic(err)
+			}
+			newNode.Body = append(newNode.Body, newAssignNode)
+		}
+
+		if lexer.cur().Type == tok.IF {
+			newIfStatement, err := lexer.ifStatement()
 			if err != nil {
 				panic(err)
 			}
@@ -649,6 +658,43 @@ func (lexer *Lexer) typeSpecifier() (returnNode Node, returnErr error) {
 		End:   lexer.cur().End,
 		Msg:   "알 수 없는 구조의 코드",
 	})
+}
+
+func (lexer *Lexer) ifStatement() (returnNode Node, returnErr error) {
+	newNode := Node{}
+	newNode.Type = IF_STATEMENT
+
+	defer func() {
+		returnNode = newNode
+		returnErr = nil
+		if r := recover(); r != nil {
+			if e, ok := r.(error); ok {
+				returnErr = e
+			}
+		}
+	}()
+
+	newNode.Begin = lexer.cur().Begin
+	lexer.eat(tok.IF)
+
+	if lexer.cur().Type == tok.LPAREN {
+		newExpr, err := lexer.expression([]tok.TokenType{tok.RPAREN})
+		if err != nil {
+			panic(err)
+		}
+		newNode.Body = append(newNode.Body, newExpr)
+	}
+
+	newCompound, err := lexer.compoundStatement()
+	if err != nil {
+		panic(err)
+	}
+	newNode.Body = append(newNode.Body, newCompound)
+
+	newNode.End = newCompound.End
+
+	return
+
 }
 
 func (lexer *Lexer) Lexicalize() (Node, error) {

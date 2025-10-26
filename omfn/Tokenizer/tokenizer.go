@@ -26,6 +26,8 @@ const (
 	RAWLINE
 	RETURN
 	OPERATOR
+	IF
+	AS
 	UNKNOWN
 	EOF
 )
@@ -71,6 +73,10 @@ func TokTypeToString(tok TokenType) string {
 		return "RETURN"
 	case OPERATOR:
 		return "OPERATOR"
+	case IF:
+		return "IF"
+	case AS:
+		return "AS"
 	default:
 		return "UNEXPECTED TOKEN"
 	}
@@ -94,6 +100,7 @@ func Tokenize(tCode string) []Token {
 	inDQuotes := false
 	inQuotes := false
 	inRawLine := false
+	afterEqual := false
 
 	newToken := func(t TokenType, val string) Token {
 		var nT Token
@@ -127,6 +134,10 @@ func Tokenize(tCode string) []Token {
 			pushToken(newToken(TYPE, current))
 		case "return":
 			pushToken(newToken(RETURN, current))
+		case "if":
+			pushToken(newToken(IF, current))
+		case "as":
+			pushToken(newToken(as, current))
 		default:
 			pushToken(newToken(IDENTIFIER, current))
 		}
@@ -142,7 +153,6 @@ func Tokenize(tCode string) []Token {
 				pushToken(newToken(RAWLINE, current))
 				continue
 			}
-			fmt.Println(string(chr), chr)
 			current += string(chr)
 			continue
 		}
@@ -187,7 +197,13 @@ func Tokenize(tCode string) []Token {
 			pushToken(newToken(COMMA, string(chr)))
 		case '=':
 			emptyCurrent()
-			pushToken(newToken(EQUAL, string(chr)))
+			if afterEqual {
+				token_list[len(token_list-1] = newToken(OPERATOR, string(chr))
+				afterEqual = false
+			} else {
+				pushToken(newToken(EQUAL, string(chr)))
+				afterEqual = true
+			}
 		case ';':
 			emptyCurrent()
 			pushToken(newToken(SEMICOLON, string(chr)))
@@ -204,6 +220,9 @@ func Tokenize(tCode string) []Token {
 			} else {
 				current += string(chr)
 			}
+		}
+		if chr != '=' {
+			afterEqual = false
 		}
 	}
 

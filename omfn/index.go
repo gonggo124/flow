@@ -1,6 +1,7 @@
 package omfn
 
 import (
+	"path/filepath"
 	"bufio"
 	"fmt"
 	"os"
@@ -33,7 +34,7 @@ func printTree(ast lexer.Node, depth int) {
 	}
 }
 
-func removeLineComments(src string) string {
+func removeLineComments(src string, target_path string) string {
 	var result []string
 
 	reader := strings.NewReader(src)
@@ -45,6 +46,13 @@ func removeLineComments(src string) string {
 
 		if strings.HasPrefix(trimmed, "//") {
 			// 줄 전체가 주석이면 무시
+			continue
+		} else if strings.HasPrefix(trimmed, "#include") {
+			// #include 구현
+			include_path := strings.SplitN(trimmed," ",2)[1]
+			// fmt.Println(filepath.Join(filepath.Dir(target_path),include_path))
+			data := utils.Must(os.ReadFile(filepath.Join(filepath.Dir(target_path),include_path)))
+			result = append(result, string(data))
 			continue
 		}
 		result = append(result, line)
@@ -61,7 +69,7 @@ func Parse(target_path string) {
 
 	fmt.Println(target_path)
 	data := utils.Must(os.ReadFile(target_path))
-	code := removeLineComments(string(data))
+	code := removeLineComments(string(data),target_path)
 
 	tokens := tokenizer.Tokenize(code)
 	for _, tok := range tokens {

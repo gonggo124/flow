@@ -117,6 +117,10 @@ func (p *Parser) callExprssion(stuff *lexer.Node) string {
 	return writer.String()
 }
 
+// cnt는 레지스터 번호 매기는 값임. 외부에서 호출할땐 무조건 0
+// resultR은 비워두면 #r0에 최종 값이 담김.
+// TODO: 여기다가 '==' 오퍼레이터 기능 구현해줘..
+// --> ==는 둘이 같으면 1 아니면 0이 되는 계산임.
 func (p *Parser) binaryExpression(stuff *lexer.Node, cnt int, resultR string) string {
 	var writer strings.Builder
 
@@ -172,6 +176,16 @@ func (p *Parser) binaryExpression(stuff *lexer.Node, cnt int, resultR string) st
 		writer.WriteString("scoreboard players operation " + resultR + " _flow_internal.register = " + op1Reg + " _flow_internal.register\n")
 		writer.WriteString("scoreboard players operation " + resultR + " _flow_internal.register " + operator.Value + "= " + op2Reg + " _flow_internal.register\n")
 	}
+
+	return writer.String()
+}
+
+func (p *Parser) ifStatement(stuff *lexer.Node) string {
+	var writer strings.Builder
+	
+	writer.WriteString(p.binaryExpression(&stuff.Body[0], 0, ""))
+	// TODO: 여기다가 익명함수 기능 구현해줘..
+	writer.WriteString("execute if score #r0 _flow_internal.register matches 1 run function")
 
 	return writer.String()
 }
@@ -291,19 +305,16 @@ func (p *Parser) functionDefinition(ast *lexer.Node) {
 	last_return := false
 	for _, stuff := range ast.Body[1].Body {
 		last_return = false
-		if stuff.Type == lexer.CALL_EXPRESSION {
+		switch stuff.Type {
+		case lexer.CALL_EXPRESSION:
 			writer.WriteString(p.callExprssion(&stuff))
-		}
-		if stuff.Type == lexer.VARIABLE_DECLARATION {
+		case lexer.VARIABLE_DECLARATION:
 			writer.WriteString(p.variableDeclaration(&stuff))
-		}
-		if stuff.Type == lexer.ASSIGNMENT_EXPRESSION {
+		case lexer.ASSIGNMENT_EXPRESSION:
 			writer.WriteString(p.variableAssignment(&stuff))
-		}
-		if stuff.Type == lexer.RETURN_EXPRESSION {
+		case lexer.RETURN_EXPRESSION:
 			writer.WriteString(p.returnExprssion(&stuff))
-		}
-		if stuff.Type == lexer.RAWLINE {
+		case lexer.RAWLINE:
 			writer.WriteString(stuff.Value+"\n")
 		}
 	}

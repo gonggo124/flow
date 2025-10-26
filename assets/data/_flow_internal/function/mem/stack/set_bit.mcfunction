@@ -9,8 +9,6 @@ execute as de8d7920-b907-4853-b3a2-c73cb0d5a84d on vehicle run ride @e[tag=_flow
 
 scoreboard players operation @s _flow_internal.stack = #sa0 _flow_internal.register
 
-tellraw @a {"score":{"name":"@s","objective":"_flow_internal.bitaddr"}}
-say ===================================
 function _flow_internal:mem/stack/stackptr/attach
 
 tag @s remove _flow_internal.stack.bit.new
