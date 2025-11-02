@@ -1,6 +1,5 @@
+void something();
 void main() {
-	if () {
-		print("hello");
-	}
+	something(1 == 1);
 }
 

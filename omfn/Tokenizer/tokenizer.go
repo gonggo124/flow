@@ -137,7 +137,7 @@ func Tokenize(tCode string) []Token {
 		case "if":
 			pushToken(newToken(IF, current))
 		case "as":
-			pushToken(newToken(as, current))
+			pushToken(newToken(AS, current))
 		default:
 			pushToken(newToken(IDENTIFIER, current))
 		}
@@ -198,7 +198,7 @@ func Tokenize(tCode string) []Token {
 		case '=':
 			emptyCurrent()
 			if afterEqual {
-				token_list[len(token_list-1] = newToken(OPERATOR, string(chr))
+				token_list[len(token_list)-1] = newToken(OPERATOR, "==")
 				afterEqual = false
 			} else {
 				pushToken(newToken(EQUAL, string(chr)))

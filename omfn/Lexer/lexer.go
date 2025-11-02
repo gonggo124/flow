@@ -3,7 +3,6 @@ package lexer
 import (
 	perr "flow/omfn/ParseErrors"
 	tok "flow/omfn/Tokenizer"
-	"fmt"
 )
 
 type NodeType int
@@ -321,7 +320,7 @@ func (lexer *Lexer) compoundStatement() (returnNode Node, returnErr error) {
 			if err != nil {
 				panic(err)
 			}
-			newNode.Body = append(newNode.Body, newAssignNode)
+			newNode.Body = append(newNode.Body, newIfStatement)
 		}
 
 		if lexer.cur().Type == tok.TYPE {
@@ -405,6 +404,7 @@ func (lexer *Lexer) functionDefinition() (returnNode Node, returnErr error) {
 	return
 }
 
+// TODO: '=='의 우선순의를 최하위에 둬야함.
 func (lexer *Lexer) expression(end_toks []tok.TokenType) (returnNode Node, returnErr error) {
 	newNode := Node{}
 	// newNode.Type =
@@ -449,7 +449,6 @@ func (lexer *Lexer) expression(end_toks []tok.TokenType) (returnNode Node, retur
 				turn = false
 				idx = 0
 			}
-			fmt.Println(exprs, turn, idx)
 			op1 := check_operand(exprs[idx])
 			opr := check_op(exprs[idx+1])
 			op2 := check_operand(exprs[idx+2])
@@ -532,6 +531,7 @@ func (lexer *Lexer) expression(end_toks []tok.TokenType) (returnNode Node, retur
 				End:   t.End,
 			}
 		}
+		// NOTE: 이녀석 왜 오작동함? if문에서 쓰니까 여기서 버그남..
 		panic(&perr.TokenError{
 			Begin: t.Begin,
 			End:   t.End,
@@ -678,11 +678,13 @@ func (lexer *Lexer) ifStatement() (returnNode Node, returnErr error) {
 	lexer.eat(tok.IF)
 
 	if lexer.cur().Type == tok.LPAREN {
+		lexer.advance()
 		newExpr, err := lexer.expression([]tok.TokenType{tok.RPAREN})
 		if err != nil {
 			panic(err)
 		}
 		newNode.Body = append(newNode.Body, newExpr)
+		lexer.eat(tok.RPAREN)
 	}
 
 	newCompound, err := lexer.compoundStatement()

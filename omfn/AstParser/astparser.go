@@ -106,6 +106,11 @@ func (p *Parser) callExprssion(stuff *lexer.Node) string {
 			writer.WriteString(result)
 			writer.WriteString("function " + os.Getenv("INT_NS") + ":mem/stack/push\n")
 		}
+		if arg.Type == lexer.BINARY_EXPRESSION {
+			result := p.binaryExpression(&arg,0,"#sa0")
+			writer.WriteString(result)
+			writer.WriteString("function " + os.Getenv("INT_NS") + ":mem/stack/push\n")
+		}
 	}
 	writer.WriteString("function " + os.Getenv("MAIN_NS") + ":" + stuff.Name + "\n")
 	if len(stuff.Body[0].Body) != 0 {
@@ -118,7 +123,9 @@ func (p *Parser) callExprssion(stuff *lexer.Node) string {
 }
 
 // cnt는 레지스터 번호 매기는 값임. 외부에서 호출할땐 무조건 0
-// resultR은 비워두면 #r0에 최종 값이 담김.
+// resultR은 최종 값이 담길 레지스터임.
+// 비워두면 #r0에 최종 값이 담김.
+// **중요** resultR은 scoreboard objective이름 필요 없음!!
 // TODO: 여기다가 '==' 오퍼레이터 기능 구현해줘..
 // --> ==는 둘이 같으면 1 아니면 0이 되는 계산임.
 func (p *Parser) binaryExpression(stuff *lexer.Node, cnt int, resultR string) string {
@@ -171,10 +178,21 @@ func (p *Parser) binaryExpression(stuff *lexer.Node, cnt int, resultR string) st
 	}
 
 	if resultR == "" {
-		writer.WriteString("scoreboard players operation " + op1Reg + " _flow_internal.register " + operator.Value + "= " + op2Reg + " _flow_internal.register\n")
+		if (operator.Value == "==") {
+			writer.WriteString("execute store success score "+op1Reg+
+			" _flow_internal.register if score "+op1Reg+" _flow_internal.register = "+op2Reg+" _flow_internal.register")
+		} else {
+			writer.WriteString("scoreboard players operation " + op1Reg + 
+			" _flow_internal.register " + operator.Value + "= " + op2Reg + " _flow_internal.register\n")
+		}
 	} else {
-		writer.WriteString("scoreboard players operation " + resultR + " _flow_internal.register = " + op1Reg + " _flow_internal.register\n")
-		writer.WriteString("scoreboard players operation " + resultR + " _flow_internal.register " + operator.Value + "= " + op2Reg + " _flow_internal.register\n")
+		if (operator.Value == "==") {
+			writer.WriteString("execute store success score "+resultR+
+			" _flow_internal.register if score "+op1Reg+" _flow_internal.register = "+op2Reg+" _flow_internal.register")
+		} else {
+			writer.WriteString("scoreboard players operation " + resultR + " _flow_internal.register = " + op1Reg + " _flow_internal.register\n")
+			writer.WriteString("scoreboard players operation " + resultR + " _flow_internal.register " + operator.Value + "= " + op2Reg + " _flow_internal.register\n")
+		}
 	}
 
 	return writer.String()
