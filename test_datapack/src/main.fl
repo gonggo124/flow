@@ -1,5 +1,0 @@
-void something();
-void main() {
-	something(1 == 1);
-}
-

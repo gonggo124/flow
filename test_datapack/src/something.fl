@@ -1,3 +1,0 @@
-void something() {
-	`say Hello Flow!
-}
