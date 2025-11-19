@@ -8,8 +8,9 @@ C와 Go를 참고해서 만든 마인크래프트 데이터팩 생성을 위한 
 2. [MonoLang의 문법](#문법)
 3. [Mono Compiler 구현 계획](#구현-계획)
 
-`README.md` 사실 기획서를 겸하고 있기 때문에 자세한 정보를 얻고싶으시다면
-추후 작성될 문서를 읽으시는 걸 추천드립니다.
+`README.md`는 사실 기획서를 겸하고 있어서 설명이 친절하지 못합니다.
+
+자세한 정보를 얻고싶으시다면 추후 작성될 문서를 읽으시는 걸 추천드립니다.
 
 # 설치/사용법
 
@@ -68,5 +69,47 @@ shell> mnc build
 ```
 
 # 문법
+
+## 모듈
+```
+module "main";
+```
+해당 구문은 현재 파일의 모듈을 지정합니다.
+
+모듈 이름은 외부에서 해당 모듈의 함수를 호출할 때 사용됩니다.
+
+예:
+```
+// sound.mn
+module "sound";
+
+void cat() {
+    cmd::tellraw("Meow");
+}
+
+void dog() {
+    cmd::tellraw("Bark!");
+}
+
+void cow() {
+    cmd::tellraw("Mooo");
+}
+
+// main.mn
+module "main";
+
+@load
+void main() {
+    sound::cat(); // Meow
+    sound::dog(); // Bark!
+    sound::cow(); // Mooo
+}
+```
+
+별도의 import 구문은 필요하지 **않습니다.**
+
+> [!NOTE]
+> 여러 파일에서 중복된 모듈 이름을 사용할 수 있으며,
+> 파일이 다르더라도 모듈 이름이 같으면 함수 이름이 중복될 수 없습니다.
 
 # 구현 계획
