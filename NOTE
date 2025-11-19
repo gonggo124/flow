@@ -1,0 +1,222 @@
+아 젠장 어떡하지.
+
+변수 시스템은 mono에서 착안해서 쓰자.
+(size)name = value;
+ex) (32)a = 20; (64)b = [1,2,3];
+
+문자열 변수는 지원 X
+
+셀렉터 시스템과 명령어 시스템을 어떻게 다룰것인가.
+
+후보들:
+
+1:
+function Speak() {
+	tellraw("hi");
+}
+function Speak2() {
+	tellraw("hi");
+	tellraw("hello");
+}
+
+@load
+function load() {
+	summon minecraft:pig {
+		Speak();
+		Speak2();
+	}
+}
+
+2:
+entity SpeakingPig extends minecraft:pig {
+	function Speak() {
+		tellraw("hi");
+	}
+}
+
+entity System extends minecraft:server {
+	function load() {
+		(*)pig = summon SpeakingPig;
+		pig.Speak();
+	}
+}
+
+2번으로 가자!!
+아 뭐지 1번이 지관적이라는 의견이 나옴. 그럼 걍 1번 ㄱㄱ
+
+namespace 기능 넣자.
+
+```
+# file: module.fl
+import cmd
+
+namespace Say {
+	function Hello() {
+		cmd::tellraw("hello");
+	}
+}
+# file: main.fl
+import module.fl
+
+function main() {
+	Say::Hello();
+}
+```
+
+아 namespace는 좀 구린데?
+
+```
+# file: module.fl
+module say
+
+import cmd
+
+function Hello() {
+	cmd::tellraw("hello");
+}
+# file: main.fl
+module main
+
+import say
+
+function main() {
+	say::Hello();
+}
+```
+
+오 이거 좋은데? ㄱㄱㄱㄱㄱ이거다
+
+이러면 import를 어디서 해야할지 알아야하니까 go처럼 .mod파일 같은거 만들자 
+
+이름은 나중에 정하고 형식은..
+```
+main: main.fl
+```
+이거 하나면 되겠는데? 컴파일 할때는 `.mod` 파일 위치 넘겨주면 되겠네
+
+그래서 파일 이름은......
+`.prj`
+ㄱㄱㄱㄱ 좋다
+
+좋아 그러면 일단 저 cmd 모듈은 이제 built-in 라이브러리고.. 생 mcfunction으로 구현되겠지..
+
+뭐야 외부 모듈 불러올 수 있어야 되네? ㅇㅋ..
+
+좋아 문법을 구체화해보자.
+
+일단 Hello World부터..
+
+```
+module "main";
+
+import "cmd";
+
+void main() {
+	cmd::tellraw("Hello, World!"); 
+}
+```
+
+좋아 타입 시스템을 구상해보자.
+대강 사용가능한 모든 타입의 변수를 선언해보는 코드를 써보자..
+
+```
+module "main";
+
+import "std";
+
+void main() {
+	score a = 10; // 기본적인 정수
+	score b = 0xffffff; // 16진수 쓰면 알아서 10진수로..
+	score c = 20.12f; // 실수 스코어보드!! (언젠가)
+	score d[] = [0,1,2,3]; // 배열 길이를 컴파일 타임에 알아서 정함
+
+	// 실제 값 사용 예시:
+
+	// output: "10 16777215 <???> 123" <???>는 실수 스코어보드 구현 여부가 분명하지 않아서..
+	// 123은 배열을 가리키는 주소임.
+	std::printf("%s %s %s %s",a,b,c,d);
+	// printf는 매크로로 구현될듯..
+}
+```
+
+아 뭔가 아쉬운데..
+
+`score`라고 쓰지말고 축약할까?
+그것도 나쁘지 않은듯?
+흐음.. 
+mono-(하나) mo a = 10; 32bit(스코어보드 한 개)
+di-(둘) di a = 10; 64bit(스코어보드 두 개)
+
+오 이거 좋다. 간--지
+
+언어 이름도 mono로 바꾼다!!
+
+그럼 다시 코드 예제 작성해보자.
+
+존재하는 타입은 void, mo(mono), di 총 세 개
+아마도 mo*, di* 처럼 포인터를 사용할 수 있게 할듯?
+
+```
+module "main"; // datapack/data/main/... 경로로 함수들이 저장됨.
+
+import "std"; // datapack/data/std/... 경로 함수 로드..를 할 필요가 있을까? ㅇㅇ 없을듯. 지워!
+
+void main() {
+	mo a = 169; // -2,147,483,648 ~ 2,147,483,647
+	di b = 170-1; // -9,223,372,036,854,775,808 ~ 9,223,372,036,854,775,807
+	mo a[] = [0,1,2,3];
+	mo *aptr = &a; // 포인터
+	di *bptr = &b;
+
+	mo hex = 0xffffff; // 16진수 표현 가능
+	mo bin = 0b1010; // 2진수 표현 가능
+
+	// printf는 아마도 네이티브 말고 매크로로 구현할 듯.
+	std::printf("%m %d", a, b); // output: "169 169"
+	std::printf("%m %m", aptr, bptr); // output: "0 1" <- 스택 주소(주소 크기는 mo)
+	std::printf("%m %d", *aptr, *bptr); // output: "169 169"
+}
+```
+
+아니야.. 변수 시스템을 쓰면 안돼.. 효율이 구리다고!!
+아 뭐야 내가 저번에 라이딩 기반 링크드 리스트로 최적화 했었지 맞다 ㅋㅋㅋ
+
+좋아 연산자는 +, -, *, /, % 같은 기본연산과 <<, >>, &, |, 등 비트 연산정도 구현하면 되려나.
+==, >, <, >=, <= 이렇게 비교 연산자까지 필요하겠네 ㅇㅇ
+!=는 없어도 됨. if (...) {...} 대신 unless (...) {...} 를 써서 하면 되거든
+아 그래도 필요하려나? 일단 !(...)는 구현해도 좋을듯
+
+연산자 예시:
+
+```
+module "operators";
+
+import "std";
+
+void notOp() {
+	mo a = 20;
+	mo b = 0; // false 대용
+	mo c = 1; // true 대용
+	// output: "0 1 0", '!'연산자는 값이 0이면 1로 바꾸고 아니면 0으로 바꿈.
+	std::printf("%m %m %m", !a, !b, !c);
+}
+
+void arithmeticOps() {
+	// 흔한 사칙연산 사용법
+	mo a = 170-1; // 169
+	// 괄호를 사용해서 우선순위를 정할 수 있다!
+	mo b = (7+11)*(7+11); // 169
+	// 기본 우선순위는 
+	// 1. *,/ 
+	// 2. +,-
+	// 3. %
+	// 다른 연산자에 대한 우선순위는 NOTE말고 README.md 상세 기능 구현 계획 탭에 넣어놓으면 될 듯..
+}
+
+void bitOps() {
+	mo a = 0b1010; // 10
+
+	// 비트 시프트 연산
+	mo b = a >> 1; // 0b0101 == 5
+	// TODO: 비트 연산 설명 추가
+```
