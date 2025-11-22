@@ -220,3 +220,49 @@ void bitOps() {
 	mo b = a >> 1; // 0b0101 == 5
 	// TODO: 비트 연산 설명 추가
 ```
+
+굳이 연산자 예시를 들어야 해? 귀찮음. ㅅㄱ
+
+지금 문자열은 cmd 라이브러리 구현하려면 필수인데
+어떻게 구현할지가 문제임..
+
+매크로(마크 매크로 아님)을 만들까?
+
+```
+def macro(a,b,c) {
+	raw("tellraw @a [\"${a}\",\"${b}\",\"${c}\"]");
+}
+
+int main() {
+	// raw("tellraw @a [\"hello\",\"what\",\"the\"]");
+	macro!(hello,what,the); // 매크로는 끝에 느낌표
+}
+```
+
+raw("...");은 c의 asm("..."); 같은거임
+raw`...`;가 나으려나?
+
+이게 제일 무난한듯?
+
+```
+def tellraw(txt) {
+	raw("tellraw @a \"${txt}\"");
+}
+
+def setScore(a,obj,value) {
+	raw`scoreboard players set ${a} ${obj} ${value}`; // 이게 더 나은듯.
+}
+	
+int main() {
+	setScore!("a","obj","10"); // 근데 10+10을 넣고싶다면? 흐음..
+}
+
+```
+
+굳이 10+10 지원 해야해? 스코어 말고 걍 변수 써~
+
+아 근데 setData나 getData처럼 문자열 다룰떄는?
+
+getData("@e[type=pig,limit=1]","nbt");
+
+걍 raw쓰게 할까.. 그게 낫겠는데
