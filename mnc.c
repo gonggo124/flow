@@ -7,10 +7,6 @@
 #include <errno.h>
 #include "Tokenizer/tokenizer.h"
 
-// dtpk/src/main.mn
-// -o
-// dtpk/data
-
 bool hasPrefix(const char* target, const char* prefix) {
 	size_t t_len = strlen(target);
 	size_t p_len = strlen(prefix);
