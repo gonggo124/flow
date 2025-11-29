@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include "Tokenizer/tokenizer.h"
 
 // dtpk/src/main.mn
 // -o
@@ -53,10 +54,9 @@ void wd_callback(const char* path) {
 	if (file==NULL)
 		perror("fopen() error");
 	else {
-		char buf[1024] = {0};
-		while (fgets(buf,1024,file)) {
-			printf("%s\n",buf);
-		}
+		Tok tokenizer = {0};
+		Tok_setFile(&tokenizer,file);
+		Tok_scan(&tokenizer);
 		fclose(file);
 	}
 }
