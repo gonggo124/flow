@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+
 #include <stdlib.h>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -50,9 +51,14 @@ void wd_callback(const char* path) {
 	if (file==NULL)
 		perror("fopen() error");
 	else {
-		Tok tokenizer = {0};
-		Tok_setFile(&tokenizer,file);
-		Tok_scan(&tokenizer);
+		Tokenizer tokenizer = {0};
+		TOK_Tokenizer_init(&tokenizer,file);
+		TOK_Tokenizer_scan(&tokenizer);
+		for (int i = 0; i < 169; i++) {
+			if (tokenizer.toks[i].type == 0) continue;
+			printf("tok: \"%s\"\n", tokenizer.toks[i].value);
+		}
+		printf("==============================\n");
 		fclose(file);
 	}
 }

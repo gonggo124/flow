@@ -13,37 +13,56 @@
 #define TOK_SEMICOLON 8 // ';'
 #define TOK_LITERAL 9 // "abc", 123 등..
 
-typedef int (*TOK_act_c)(Tok *tok, char *buf);
+typedef int (*TOK_act_c)(Tokenizer *tok, char chr);
 
-#define STATE_DEFAULT 0
-#define STATE_STRING  1
-#define STATE_NUMBER  2
+#define STATE_NORMAL 0
+#define STATE_STRING 1
+#define STATE_STRING_SKIP 2
+#define STATE_NUMBER 3
 
-#define CONDITION_LEN 1
-#define NEXT_LEN CONDITION_LEN
+#define CONDITION_LEN 3
+#define NEXT_LEN CONDITION_LEN+1
 #define ACTS_LEN CONDITION_LEN+1
 typedef struct {
-	const char* condition[CONDITION_LEN];
-	const TOK_statenum next[NEXT_LEN];
-	const TOK_act_c acts[ACTS_LEN];
+	char* condition[CONDITION_LEN];
+	TOK_state_t next[NEXT_LEN];
+	TOK_act_c acts[ACTS_LEN];
+	int size;
 } TOK_State;
 
 
-int TOK_none(Tok *tok, char *buf); // do nothing
-int TOK_putc(Tok *tok, char *buf); // put char
-int TOK_puts(Tok *tok, char *buf); // put string
-int TOK_puttoken(Tok *tok, char *buf); // put token
-// int TOK_default_state_default(Tok *tok, char *buf); // 보류
+static int none(Tokenizer *tok, char chr); // do nothing
+static int pushc(Tokenizer *tok, char chr); // push char to buf
+static int tokc(Tokenizer *tok, char chr); // tokenize current(only buf)
+static int toka(Tokenizer *tok, char chr); // tokenize all(buf and chr)
+// int TOK_default_state_default(Tokenizer *tok, char chr); // 보류
 
-const TOK_State TOK_States = {
-	{
-		.condition = {"{}();","\""},
-		.next = {STATE_DEFAULT,STATE_STRING},
-		.acts = {TOK_puts,TOK_none,TOK_putc}
+static const TOK_State States[] = {
+	{ // normal state
+		.condition = {"{}();"     ,"\""        ," \n\r\t"                },
+		.next      = {STATE_NORMAL,STATE_STRING,STATE_NORMAL,STATE_NORMAL},
+		.acts      = {toka        ,none        ,tokc        ,pushc       },
+		.size      = 3
+	},
+	{ // string state
+		.condition = {"\""        ,"\\"                          },
+		.next      = {STATE_NORMAL,STATE_STRING_SKIP,STATE_STRING},
+		.acts      = {tokc        ,none             ,pushc       },
+		.size      = 2
+	},
+	{ // string-skip state
+		.condition = {},
+		.next      = {STATE_NORMAL},
+		.acts      = {pushc},
+		.size      = 0
+	},
+	{ // number state
+		.condition = {},
+		.next      = {},
+		.acts      = {},
+		.size      = 0
 	}
 };
-
-#define BUF_SIZE 256
 
 #define ERR_BUF_OVERFLOW 0
 
@@ -55,41 +74,81 @@ void TOK_strerr(char *buf, int errno) {
 	}
 }
 
-int Tok_scan(Tok *tok) {
+int TOK_Tokenizer_scan(Tokenizer *tok) {
 	// TODO: tokenizer
 	char chr;
-	char buf[BUF_SIZE] = {0};
-	int boffset = 0;
-	TOK_offset_t offset = 0;
 	while ((chr = fgetc(tok->file)) != EOF) {
-		if (boffset < BUF_SIZE) {
-			buf[boffset]=chr;
-			boffset+=1;
-			offset+=1;
-//			if (strcmp(buf,
-		} else {
-			return TOK_ERR_BUF_OVERFLOW;
+		TOK_State cstate = States[tok->state]; // current state
+		//printf("current state: %d\n",tok->state);
+		printf("chr: %c ",chr);
+		for (int i = 0; i < cstate.size+1; i++) {
+			if (i < cstate.size && !strchr(cstate.condition[i],chr)) continue;
+			if (i < cstate.size) printf("i: %d ",i);
+			int err = cstate.acts[i](tok,chr);
+			if (err) return err;
+			tok->state=cstate.next[i];
+			break;
 		}
-			
+		printf("\n");
 	}
 	return 0;
 }
 
-int Tok_init(Tok *tok, FILE *file) {
+int TOK_Tokenizer_push(Tokenizer *tokenizer, Token tok) {
+	if (tokenizer->offset < 169) {
+		tokenizer->toks[tokenizer->offset]=tok;
+		tokenizer->offset++;
+	} else {
+		printf("overflow shit\n");
+		return 1;
+	}
+	return 0;
+}
+
+int TOK_Tokenizer_init(Tokenizer *tok, FILE *file) {
+	tok->state = STATE_NORMAL;
 	tok->file = file;
+	memset(tok->buf,0,TOK_BUF_SIZE);
 	return 0;
 }
 
-int TOK_putc(Tok *tok, char *buf) {
-	return 0;
+static Token Tokenize(char *buf) {
+	// TODO: Do Tokenize Shit
+	Token new_tok = {0};
+	new_tok.type = 1;
+	strcpy(new_tok.value,buf);
+	return new_tok;
 }
 
-int TOK_puts(Tok *tok, char *buf) {
-	return 0;
-}
-
-int TOK_none(Tok *tok, char *buf) {
+static int none(Tokenizer *tok, char chr) {
 	(void)tok;
-	(void)buf;
+	(void)chr;
+	printf("none ");
+	return 0;
+}
+static int pushc(Tokenizer *tok, char chr) {
+	printf("putchar ");
+	if (tok->boffset < TOK_BUF_SIZE) {
+		tok->buf[tok->boffset]=chr;
+		tok->boffset++;
+	} else {
+		return ERR_BUF_OVERFLOW;
+	}
+	return 0;
+}
+static int tokc(Tokenizer *tok, char chr) {
+	if (tok->buf[0]==0) return 0;
+	printf("tokc ");
+	(void)chr;
+	TOK_Tokenizer_push(tok,Tokenize(tok->buf));
+	memset(tok->buf,0,TOK_BUF_SIZE);
+	tok->boffset = 0;
+	return 0;
+}
+static int toka(Tokenizer *tok, char chr) {
+	printf("toka ");
+	tokc(tok,chr);
+	pushc(tok,chr);
+	tokc(tok,chr);
 	return 0;
 }
