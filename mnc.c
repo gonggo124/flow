@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include "Tokenizer/tokenizer.h"
+#include "Parser/parser.h"
 
 bool hasPrefix(const char* target, const char* prefix) {
 	size_t t_len = strlen(target);
@@ -55,10 +56,15 @@ void wd_callback(const char* path) {
 		TOK_Tokenizer_init(&tokenizer,file);
 		TOK_Tokenizer_scan(&tokenizer);
 		for (int i = 0; i < 169; i++) {
-			if (tokenizer.toks[i].type == 0) continue;
-			printf("tok: \"%s\"\n", tokenizer.toks[i].value);
+			if (tokenizer.toks.arr[i].type == 0) continue;
+			printf("tok: \"%s\"\n", tokenizer.toks.arr[i].value);
 		}
 		printf("==============================\n");
+		
+		Parser parser = {0};
+		PAR_Parser_init(&parser,&tokenizer.toks);
+		PAR_Parser_scan(&parser);
+
 		fclose(file);
 	}
 }

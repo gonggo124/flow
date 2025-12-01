@@ -1,0 +1,13 @@
+#ifndef MNC_Parser
+#define MNC_Parser
+
+#include "../Tokenizer/tokenizer.h"
+
+typedef struct {
+	TokenList *toks;
+	TOK_size_t offset;
+} Parser;
+
+
+
+#endif // MNC_Parser

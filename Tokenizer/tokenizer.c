@@ -1,5 +1,6 @@
 #include "tokenizer.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define TOK_MODULE 0 // 'module'
@@ -79,28 +80,13 @@ int TOK_Tokenizer_scan(Tokenizer *tok) {
 	char chr;
 	while ((chr = fgetc(tok->file)) != EOF) {
 		TOK_State cstate = States[tok->state]; // current state
-		//printf("current state: %d\n",tok->state);
-		printf("chr: %c ",chr);
 		for (int i = 0; i < cstate.size+1; i++) {
 			if (i < cstate.size && !strchr(cstate.condition[i],chr)) continue;
-			if (i < cstate.size) printf("i: %d ",i);
 			int err = cstate.acts[i](tok,chr);
 			if (err) return err;
 			tok->state=cstate.next[i];
 			break;
 		}
-		printf("\n");
-	}
-	return 0;
-}
-
-int TOK_Tokenizer_push(Tokenizer *tokenizer, Token tok) {
-	if (tokenizer->offset < 169) {
-		tokenizer->toks[tokenizer->offset]=tok;
-		tokenizer->offset++;
-	} else {
-		printf("overflow shit\n");
-		return 1;
 	}
 	return 0;
 }
@@ -123,11 +109,9 @@ static Token Tokenize(char *buf) {
 static int none(Tokenizer *tok, char chr) {
 	(void)tok;
 	(void)chr;
-	printf("none ");
 	return 0;
 }
 static int pushc(Tokenizer *tok, char chr) {
-	printf("putchar ");
 	if (tok->boffset < TOK_BUF_SIZE) {
 		tok->buf[tok->boffset]=chr;
 		tok->boffset++;
@@ -138,17 +122,32 @@ static int pushc(Tokenizer *tok, char chr) {
 }
 static int tokc(Tokenizer *tok, char chr) {
 	if (tok->buf[0]==0) return 0;
-	printf("tokc ");
 	(void)chr;
-	TOK_Tokenizer_push(tok,Tokenize(tok->buf));
+	TOK_TokenList_push(&(tok->toks),Tokenize(tok->buf));
 	memset(tok->buf,0,TOK_BUF_SIZE);
 	tok->boffset = 0;
 	return 0;
 }
 static int toka(Tokenizer *tok, char chr) {
-	printf("toka ");
 	tokc(tok,chr);
 	pushc(tok,chr);
 	tokc(tok,chr);
 	return 0;
+}
+
+void TOK_TokenList_push(TokenList *toklist, Token tok) {
+	if (toklist->offset < 169) {
+		toklist->arr[toklist->offset]=tok;
+		toklist->offset++;
+	}
+}
+
+void TOK_TokenList_pop(TokenList *toklist) {
+	(void)toklist;
+}	
+void TOK_TokenList_clear(TokenList *toklist) {
+	(void)toklist;
+}
+void TOK_TokenList_destroy(TokenList *toklist) {
+	(void)toklist;
 }

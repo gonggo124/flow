@@ -2,7 +2,7 @@
 #define MNC_Tok
 #include <stdio.h>
 
-typedef int TOK_offset_t;
+typedef int TOK_size_t;
 typedef int TOK_state_t;
 typedef int TOK_line;
 typedef int TOK_Type;
@@ -16,13 +16,25 @@ typedef struct {
 } Token;
 
 typedef struct {
-	FILE* file;  // 대상 파일.
-	TOK_offset_t errpos; // 문제 발생지.
-	TOK_state_t state; // 상태.
+	Token arr[169]; // TODO: dynamic array로 교체
+	TOK_size_t size;
+	TOK_size_t cap;
+	TOK_size_t offset;
+} TokenList;
+
+void TOK_TokenList_push(TokenList *toklist, Token tok);
+void TOK_TokenList_pop(TokenList *toklist);
+void TOK_TokenList_clear(TokenList *toklist);
+void TOK_TokenList_destroy(TokenList *toklist);
+
+typedef struct {
+	FILE* file;
+	TOK_size_t errpos;
+	TOK_state_t state;
 	char buf[TOK_BUF_SIZE];
-	TOK_offset_t boffset;
-	Token toks[169]; // TODO: Dynamic Array로 구현해야 함.
-	TOK_offset_t offset;
+	TOK_size_t boffset;
+	TokenList toks;
+	TOK_size_t offset;
 } Tokenizer;
 
 

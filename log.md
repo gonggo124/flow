@@ -36,3 +36,9 @@
 - 이제 샘플코드 토큰으로 변환 가능
 - none, pushc, tokc, toka 상당 부분 개발 완료
 - 필요 함수 추가. (Tokenize, TOK_Tokenizer_push 등)
+
+2025.12.1
+- Dynamic Array 준비 (TokenList 만듦. 아직 고정 길이 배열)
+- Parser 준비.
+- TODO: Implement Tokenizing
+- TODO: Dynamic Array
