@@ -2,7 +2,7 @@
 
 set -xe
 
-CFLAGS="-Wall -Wextra -Wshadow -Werror --pedantic"
+CFLAGS="-Wall -Wextra -Wshadow -Werror --pedantic -std=c23"
 LIBS=""
 
 gcc $CFLAGS -o mnc mnc.c Tokenizer/tokenizer.c Parser/parser.c $LIBS

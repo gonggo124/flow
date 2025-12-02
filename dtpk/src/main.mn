@@ -1,4 +1,11 @@
-module "main";
+module "main"
 
-int main() {
+mo main() {
+}
+
+mo test()
+
+di test2() {}
+
+mo foo() {
 }

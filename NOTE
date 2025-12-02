@@ -297,3 +297,40 @@ int main() {
 	}
 }		
 ```
+
+아 뭐야 int라고 써놨네? 잘못썼구만
+
+```
+module "main"
+
+import "cmd"
+
+void bullet() {
+	// 대충 모든 총알을 다음 함수에게 반환하는 코드 
+	// return as bullets 이런 느낌
+}
+
+void shoot() {
+	// 대충 총알 쏘는 코드
+}
+
+void getNear() {
+	cmd::addTag("self")
+	defer cmd::removeTag("self")
+	return as @e[distance=..0.1,tag=!self]
+}
+
+mac dmg(v) {
+	$raw("damage @s {v}")
+}
+
+@tick
+void tick() {
+	bullet() |> getNear() |> dmg!(10)
+}
+
+```
+
+이런 느낌 개쩌는데 세부 구현 사항을 구상하기 어렵네..
+
+semicolon은 선택사항으로 해도 되겠던데?

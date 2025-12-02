@@ -42,3 +42,9 @@
 - Parser 준비.
 - TODO: Implement Tokenizing
 - TODO: Dynamic Array
+
+2025.12.2
+- Tokenizing 구현
+-> type 구현 중
+- #define을 enum으로 교체
+- Token에 line number 정보 담음. (에러 표시할 때 유용)

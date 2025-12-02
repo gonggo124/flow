@@ -6,5 +6,6 @@ void PAR_Parser_init(Parser *p, TokenList *toks) {
 }
 
 int PAR_Parser_scan(Parser *p) {
-	
+	(void)p;
+	return 0;
 }

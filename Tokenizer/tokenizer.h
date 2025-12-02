@@ -4,7 +4,7 @@
 
 typedef int TOK_size_t;
 typedef int TOK_state_t;
-typedef int TOK_line;
+typedef int TOK_line_t;
 typedef int TOK_Type;
 
 #define TOK_BUF_SIZE 256
@@ -12,7 +12,7 @@ typedef int TOK_Type;
 typedef struct {
 	TOK_Type type;
 	char     value[TOK_BUF_SIZE];
-	TOK_line line;
+	TOK_line_t linenum;
 } Token;
 
 typedef struct {
@@ -30,11 +30,16 @@ void TOK_TokenList_destroy(TokenList *toklist);
 typedef struct {
 	FILE* file;
 	TOK_size_t errpos;
+
 	TOK_state_t state;
+
 	char buf[TOK_BUF_SIZE];
 	TOK_size_t boffset;
+
 	TokenList toks;
 	TOK_size_t offset;
+
+	TOK_line_t linenum;
 } Tokenizer;
 
 

@@ -3,23 +3,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TOK_MODULE 0 // 'module'
-#define TOK_IDENTIFIER 1 // 나머지
-#define TOK_MO 2 // 'mo'
-#define TOK_DI 3 // 'di'
-#define TOK_L_PAREN 4 // '('
-#define TOK_R_PAREN 5 // ')'
-#define TOK_L_BRACE 6 // '{'
-#define TOK_R_BRACE 7 // '}'
-#define TOK_SEMICOLON 8 // ';'
-#define TOK_LITERAL 9 // "abc", 123 등..
+enum {
+	TOK_MODULE = 1, // 'module'
+	TOK_IDENTIFIER, // 나머지
+	TOK_MO, // 'mo'
+	TOK_DI, // 'di'
+	TOK_L_PAREN, // '('
+	TOK_R_PAREN, // ')'
+	TOK_L_BRACE, // '{'
+	TOK_R_BRACE, // '}'
+	TOK_SEMICOLON, // ';'
+	TOK_LITERAL // "abc", 123 등..
+};
 
 typedef int (*TOK_act_c)(Tokenizer *tok, char chr);
 
-#define STATE_NORMAL 0
-#define STATE_STRING 1
-#define STATE_STRING_SKIP 2
-#define STATE_NUMBER 3
+enum {
+	STATE_NORMAL = 0,
+	STATE_STRING,
+	STATE_STRING_SKIP,
+	STATE_NUMBER
+};
 
 #define CONDITION_LEN 3
 #define NEXT_LEN CONDITION_LEN+1
@@ -65,7 +69,10 @@ static const TOK_State States[] = {
 	}
 };
 
-#define ERR_BUF_OVERFLOW 0
+enum {
+	ERR_BUF_OVERFLOW,
+	ERR_UNEXPECTED_TOKEN
+};
 
 void TOK_strerr(char *buf, int errno) {
 	 switch (errno) {
@@ -76,10 +83,10 @@ void TOK_strerr(char *buf, int errno) {
 }
 
 int TOK_Tokenizer_scan(Tokenizer *tok) {
-	// TODO: tokenizer
 	char chr;
 	while ((chr = fgetc(tok->file)) != EOF) {
 		TOK_State cstate = States[tok->state]; // current state
+		if (chr == '\n') tok->linenum++;
 		for (int i = 0; i < cstate.size+1; i++) {
 			if (i < cstate.size && !strchr(cstate.condition[i],chr)) continue;
 			int err = cstate.acts[i](tok,chr);
@@ -95,15 +102,40 @@ int TOK_Tokenizer_init(Tokenizer *tok, FILE *file) {
 	tok->state = STATE_NORMAL;
 	tok->file = file;
 	memset(tok->buf,0,TOK_BUF_SIZE);
+	TOK_TokenList_clear(&tok->toks);
 	return 0;
 }
 
-static Token Tokenize(char *buf) {
+static int Tokenize(Token *tok, char *buf) {
+	if (buf[0]==0) return 0;
 	// TODO: Do Tokenize Shit
-	Token new_tok = {0};
-	new_tok.type = 1;
-	strcpy(new_tok.value,buf);
-	return new_tok;
+	// > Do Literal Shit
+	// > Do Line Number Shit -> done.
+
+	strcpy(tok->value,buf);
+
+	size_t len = strlen(buf);
+
+	// type specification
+	if (len==1) {
+		switch(buf[0]) {
+			case '(': tok->type = TOK_L_PAREN; break;
+			case ')': tok->type = TOK_R_PAREN; break;
+			case '{': tok->type = TOK_L_BRACE; break;
+			case '}': tok->type = TOK_R_BRACE; break;
+			case ';': tok->type = TOK_SEMICOLON; break;
+			default: return ERR_UNEXPECTED_TOKEN;
+		}
+	} else {
+		if (strcmp(buf,"module")==0) tok->type = TOK_MODULE;
+		else if (strcmp(buf,"mo")==0) tok->type = TOK_MO;
+		else if (strcmp(buf,"di")==0) tok->type = TOK_DI;
+		else if (0) tok->type = TOK_LITERAL; // TODO: literal something;
+		else tok->type = TOK_IDENTIFIER;
+	}
+	// type spec end
+
+	return 0;
 }
 
 static int none(Tokenizer *tok, char chr) {
@@ -122,10 +154,17 @@ static int pushc(Tokenizer *tok, char chr) {
 }
 static int tokc(Tokenizer *tok, char chr) {
 	if (tok->buf[0]==0) return 0;
-	(void)chr;
-	TOK_TokenList_push(&(tok->toks),Tokenize(tok->buf));
-	memset(tok->buf,0,TOK_BUF_SIZE);
-	tok->boffset = 0;
+	(void)chr; // trash
+
+	Token new_token = {0};
+	Tokenize(&new_token,tok->buf);
+	new_token.linenum = tok->linenum;
+
+	TOK_TokenList_push(&(tok->toks),new_token);
+
+	memset(tok->buf,0,TOK_BUF_SIZE); // empty buf
+	tok->boffset = 0; // empty buf
+
 	return 0;
 }
 static int toka(Tokenizer *tok, char chr) {
@@ -146,6 +185,7 @@ void TOK_TokenList_pop(TokenList *toklist) {
 	(void)toklist;
 }	
 void TOK_TokenList_clear(TokenList *toklist) {
+	memset(toklist,0,169*sizeof(Token));
 	(void)toklist;
 }
 void TOK_TokenList_destroy(TokenList *toklist) {
