@@ -13,7 +13,7 @@ enum {
 	TOK_L_BRACE, // '{'
 	TOK_R_BRACE, // '}'
 	TOK_SEMICOLON, // ';'
-	TOK_LITERAL // "abc", 123 등..
+	TOK_LITERAL_STRING // "abc", 123 등..
 };
 
 typedef int (*TOK_act_c)(Tokenizer *tok, char chr);
@@ -57,7 +57,7 @@ static const TOK_State States[] = {
 	},
 	{ // string-skip state
 		.condition = {},
-		.next      = {STATE_NORMAL},
+		.next      = {STATE_STRING},
 		.acts      = {pushc},
 		.size      = 0
 	},
@@ -109,8 +109,6 @@ int TOK_Tokenizer_init(Tokenizer *tok, FILE *file) {
 static int Tokenize(Token *tok, char *buf) {
 	if (buf[0]==0) return 0;
 	// TODO: Do Tokenize Shit
-	// > Do Literal Shit
-	// > Do Line Number Shit -> done.
 
 	strcpy(tok->value,buf);
 
@@ -130,7 +128,6 @@ static int Tokenize(Token *tok, char *buf) {
 		if (strcmp(buf,"module")==0) tok->type = TOK_MODULE;
 		else if (strcmp(buf,"mo")==0) tok->type = TOK_MO;
 		else if (strcmp(buf,"di")==0) tok->type = TOK_DI;
-		else if (0) tok->type = TOK_LITERAL; // TODO: literal something;
 		else tok->type = TOK_IDENTIFIER;
 	}
 	// type spec end
@@ -152,13 +149,18 @@ static int pushc(Tokenizer *tok, char chr) {
 	}
 	return 0;
 }
+static Token make_token(Tokenizer *tok) {
+	Token new_token = {0};
+	new_token.linenum = tok->linenum;
+	return new_token;
+}
 static int tokc(Tokenizer *tok, char chr) {
 	if (tok->buf[0]==0) return 0;
 	(void)chr; // trash
 
-	Token new_token = {0};
+	Token new_token = make_token(tok);
 	Tokenize(&new_token,tok->buf);
-	new_token.linenum = tok->linenum;
+	if (tok->state==STATE_STRING) new_token.type=TOK_LITERAL_STRING;
 
 	TOK_TokenList_push(&(tok->toks),new_token);
 
