@@ -1,7 +1,13 @@
-#include "tokenizer.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "tokenizer.h"
+
+#define must(expr) do {\
+		int _e = (expr); \
+		if (_e) return _e; \
+	} while(0)
 
 enum {
 	TOK_MODULE = 1, // 'module'
@@ -20,12 +26,13 @@ typedef int (*TOK_act_c)(Tokenizer *tok, char chr);
 
 enum {
 	STATE_NORMAL = 0,
+	STATE_WORD,
 	STATE_STRING,
 	STATE_STRING_SKIP,
 	STATE_NUMBER
 };
 
-#define CONDITION_LEN 3
+#define CONDITION_LEN 7
 #define NEXT_LEN CONDITION_LEN+1
 #define ACTS_LEN CONDITION_LEN+1
 typedef struct {
@@ -38,16 +45,27 @@ typedef struct {
 
 static int none(Tokenizer *tok, char chr); // do nothing
 static int pushc(Tokenizer *tok, char chr); // push char to buf
-static int tokc(Tokenizer *tok, char chr); // tokenize current(only buf)
+static int tokc(Tokenizer *tok, char chr); // tokenize current(only buf, ignore chr)
 static int toka(Tokenizer *tok, char chr); // tokenize all(buf and chr)
+static int tokcw(Tokenizer *tok, char chr); // tokenize current end wind back(offset-=1)
 // int TOK_default_state_default(Tokenizer *tok, char chr); // 보류
 
+#define IDCHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+#define NUMBERCHARS "0123456789"
+
+// MARK: #001
 static const TOK_State States[] = {
 	{ // normal state
-		.condition = {"{}();"     ,"\""        ," \n\r\t"                },
-		.next      = {STATE_NORMAL,STATE_STRING,STATE_NORMAL,STATE_NORMAL},
-		.acts      = {toka        ,none        ,tokc        ,pushc       },
-		.size      = 3
+		.condition = {IDCHARS   ,NUMBERCHARS ," \n\r\t"   ,"{}();"     ,"\""         /*DEFAULT*/ },
+		.next      = {STATE_WORD,STATE_NUMBER,STATE_NORMAL,STATE_NORMAL,STATE_STRING,STATE_NORMAL},
+		.acts      = {pushc     ,pushc       ,tokc        ,toka        ,none        ,pushc       },
+		.size      = 5 // TODO: it's not DRY. FIX IT!!! I WAS ABOUT TO SPEND 10 HOURS TO FIX THE BUG BECAUSE OF IT!!
+	},
+	{ // word state
+		.condition = {IDCHARS NUMBERCHARS /*DEFAULT*/ },
+		.next      = {STATE_WORD         ,STATE_NORMAL},
+		.acts      = {pushc              ,tokcw       },
+		.size      = 1
 	},
 	{ // string state
 		.condition = {"\""        ,"\\"                          },
@@ -61,7 +79,7 @@ static const TOK_State States[] = {
 		.acts      = {pushc},
 		.size      = 0
 	},
-	{ // number state
+	{ // TODO: number state
 		.condition = {},
 		.next      = {},
 		.acts      = {},
@@ -82,6 +100,7 @@ void TOK_strerr(char *buf, int errno) {
 	}
 }
 
+// MARK: #003
 int TOK_Tokenizer_scan(Tokenizer *tok) {
 	char chr;
 	while ((chr = fgetc(tok->file)) != EOF) {
@@ -96,6 +115,10 @@ int TOK_Tokenizer_scan(Tokenizer *tok) {
 		}
 	}
 	return 0;
+}
+
+int TOK_Tokenizer_wind(Tokenizer *tok, long amount) {
+	return fseek(tok->file,-amount,SEEK_CUR);
 }
 
 int TOK_Tokenizer_init(Tokenizer *tok, FILE *file) {
@@ -135,6 +158,8 @@ static int Tokenize(Token *tok, char *buf) {
 	return 0;
 }
 
+
+// MARK: #002
 static int none(Tokenizer *tok, char chr) {
 	(void)tok;
 	(void)chr;
@@ -169,12 +194,19 @@ static int tokc(Tokenizer *tok, char chr) {
 
 	return 0;
 }
-static int toka(Tokenizer *tok, char chr) {
-	tokc(tok,chr);
-	pushc(tok,chr);
-	tokc(tok,chr);
+static int tokcw(Tokenizer *tok, char chr) {
+	must(tokc(tok,chr));
+	TOK_Tokenizer_wind(tok,1);
 	return 0;
 }
+static int toka(Tokenizer *tok, char chr) {
+	must(tokc(tok,chr));
+	must(pushc(tok,chr));
+	must(tokc(tok,chr));
+	return 0;
+}
+
+
 
 void TOK_TokenList_push(TokenList *toklist, Token tok) {
 	if (toklist->offset < 169) {
