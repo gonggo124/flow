@@ -48,7 +48,6 @@ static int pushc(Tokenizer *tok, char chr); // push char to buf
 static int tokc(Tokenizer *tok, char chr); // tokenize current(only buf, ignore chr)
 static int toka(Tokenizer *tok, char chr); // tokenize all(buf and chr)
 static int tokcw(Tokenizer *tok, char chr); // tokenize current end wind back(offset-=1)
-// int TOK_default_state_default(Tokenizer *tok, char chr); // 보류
 
 #define IDCHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
 #define NUMBERCHARS "0123456789"
@@ -68,22 +67,22 @@ static const TOK_State States[] = {
 		.size      = 1
 	},
 	{ // string state
-		.condition = {"\""        ,"\\"                          },
+		.condition = {"\""        ,"\\"              /*DEFAULT*/ },
 		.next      = {STATE_NORMAL,STATE_STRING_SKIP,STATE_STRING},
 		.acts      = {tokc        ,none             ,pushc       },
 		.size      = 2
 	},
 	{ // string-skip state
-		.condition = {},
+		.condition = {/*DEFAULT*/ },
 		.next      = {STATE_STRING},
-		.acts      = {pushc},
+		.acts      = {pushc       },
 		.size      = 0
 	},
 	{ // TODO: number state
-		.condition = {},
-		.next      = {},
-		.acts      = {},
-		.size      = 0
+		.condition = {NUMBERCHARS ,/*DEFAULT*/ },
+		.next      = {STATE_NUMBER,STATE_NORMAL},
+		.acts      = {pushc       ,tokcw       },
+		.size      = 1
 	}
 };
 
@@ -185,7 +184,7 @@ static int tokc(Tokenizer *tok, char chr) {
 
 	Token new_token = make_token(tok);
 	Tokenize(&new_token,tok->buf);
-	if (tok->state==STATE_STRING) new_token.type=TOK_LITERAL_STRING;
+	if (tok->state==STATE_STRING || tok->state==STATE_NUMBER) new_token.type=TOK_LITERAL_STRING;
 
 	TOK_TokenList_push(&(tok->toks),new_token);
 
