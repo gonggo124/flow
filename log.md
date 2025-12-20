@@ -61,3 +61,7 @@
 
 2025.12.18
 - 이제 Tokenizer가 숫자 인식함
+
+2025.12.20
+- Parser 뼈대 어느정도 구현. 이제 module "<module name>" 인식함
+- Unexpected Token Error 구현

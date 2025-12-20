@@ -9,19 +9,6 @@
 		if (_e) return _e; \
 	} while(0)
 
-enum {
-	TOK_MODULE = 1, // 'module'
-	TOK_IDENTIFIER, // 나머지
-	TOK_MO, // 'mo'
-	TOK_DI, // 'di'
-	TOK_L_PAREN, // '('
-	TOK_R_PAREN, // ')'
-	TOK_L_BRACE, // '{'
-	TOK_R_BRACE, // '}'
-	TOK_SEMICOLON, // ';'
-	TOK_LITERAL_STRING // "abc", 123 등..
-};
-
 typedef int (*TOK_act_c)(Tokenizer *tok, char chr);
 
 enum {
@@ -184,7 +171,7 @@ static int tokc(Tokenizer *tok, char chr) {
 
 	Token new_token = make_token(tok);
 	Tokenize(&new_token,tok->buf);
-	if (tok->state==STATE_STRING || tok->state==STATE_NUMBER) new_token.type=TOK_LITERAL_STRING;
+	if (tok->state==STATE_STRING || tok->state==STATE_NUMBER) new_token.type=TOK_LITERAL;
 
 	TOK_TokenList_push(&(tok->toks),new_token);
 

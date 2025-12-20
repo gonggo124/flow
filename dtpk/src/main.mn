@@ -1,15 +1,4 @@
-module "\"main\""
+module "main"
 
 mo main() {
-	123
-}
-
-mo test()
-
-di test2() {}
-
-mo foo_bar_123() {
-}
-
-mo _private() {
 }

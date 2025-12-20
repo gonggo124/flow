@@ -2,6 +2,19 @@
 #define MNC_Tok
 #include <stdio.h>
 
+enum {
+	TOK_MODULE = 1, // 'module'
+	TOK_IDENTIFIER, // 나머지
+	TOK_MO, // 'mo'
+	TOK_DI, // 'di'
+	TOK_L_PAREN, // '('
+	TOK_R_PAREN, // ')'
+	TOK_L_BRACE, // '{'
+	TOK_R_BRACE, // '}'
+	TOK_SEMICOLON, // ';'
+	TOK_LITERAL // "abc", 123 등..
+};
+
 typedef int TOK_size_t;
 typedef int TOK_state_t;
 typedef int TOK_line_t;

@@ -20,9 +20,11 @@ bool hasPrefix(const char* target, const char* prefix) {
 #define FLAG_OUTPUT 1
 typedef int flag_t;
 
+#define PATH_SIZE 1025
+
 void walkdir(const char* fn, void (*callback)(const char* path)) {
 	DIR *dir;
-	char path[1025];
+	char path[PATH_SIZE];
 	struct dirent *entry;
 	struct stat info;
 
@@ -52,6 +54,13 @@ void wd_callback(const char* path) {
 	if (file==NULL)
 		perror("fopen() error");
 	else {
+		char copied_path[PATH_SIZE]; strcpy(copied_path,path);
+		char *extender = strrchr(copied_path,'.');
+		if (extender) extender++;
+		else { printf("couldn't find file extender"); return; }
+
+		if (strcmp(extender,"mn")!=0) return;
+
 		Tokenizer tokenizer = {0};
 		TOK_Tokenizer_init(&tokenizer,file);
 		TOK_Tokenizer_scan(&tokenizer);
@@ -64,7 +73,10 @@ void wd_callback(const char* path) {
 		
 		Parser parser = {0};
 		PAR_Parser_init(&parser,&tokenizer.toks);
-		PAR_Parser_scan(&parser);
+		int parse_err = PAR_Parser_scan(&parser);
+		if (parse_err < 0) {
+			printf("Parse Error: %s at %s:%d\n",PAR_get_error(parse_err),path,parser.linenum);
+		}
 
 		fclose(file);
 	}

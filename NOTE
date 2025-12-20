@@ -334,3 +334,7 @@ void tick() {
 이런 느낌 개쩌는데 세부 구현 사항을 구상하기 어렵네..
 
 semicolon은 선택사항으로 해도 되겠던데?
+
+Attribute 문법은 #onload, #ontick, #raw 가 더 간지나는  듯ㅇㅇ
+
+매크로 선언은 mac func() { ... }가 아니라 #mac int func() { ... } 이런 느낌이 좋을 듯.
