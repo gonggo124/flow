@@ -62,6 +62,10 @@
 2025.12.18
 - 이제 Tokenizer가 숫자 인식함
 
-2025.12.20
+2025.12.20(1)
 - Parser 뼈대 어느정도 구현. 이제 module "<module name>" 인식함
 - Unexpected Token Error 구현
+
+2025.12.20(2)
+- TokenList를 Dynamic Array로 전환함. (아마도 작?동)
+- Parser걍 다 밀어버림. 새로운 구조 도입 예정

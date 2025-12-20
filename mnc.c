@@ -65,7 +65,7 @@ void wd_callback(const char* path) {
 		TOK_Tokenizer_init(&tokenizer,file);
 		TOK_Tokenizer_scan(&tokenizer);
 		for (int i = 0; i < 169; i++) {
-			Token *item = &(tokenizer.toks.arr[i]);
+			Token *item = &(tokenizer.toks.data[i]);
 			if (item->type == 0) continue;
 			printf("tok[%d] at %d: \"%s\"\n", item->type, item->linenum, item->value);
 		}

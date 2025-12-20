@@ -4,6 +4,8 @@
 
 enum {
 	TOK_MODULE = 1, // 'module'
+	TOK_FUNC, // 'func'
+	TOK_MAC, // 'mac'
 	TOK_IDENTIFIER, // 나머지
 	TOK_MO, // 'mo'
 	TOK_DI, // 'di'
@@ -29,14 +31,14 @@ typedef struct {
 } Token;
 
 typedef struct {
-	Token arr[169]; // TODO: dynamic array로 교체
+	Token* data;
 	TOK_size_t size;
 	TOK_size_t cap;
-	TOK_size_t offset;
 } TokenList;
 
+TokenList TOK_TokenList_make(size_t start_cap);
+void TOK_TokenList_extend(TokenList *toklist, size_t extend_amount);
 void TOK_TokenList_push(TokenList *toklist, Token tok);
-void TOK_TokenList_pop(TokenList *toklist);
 void TOK_TokenList_clear(TokenList *toklist);
 void TOK_TokenList_destroy(TokenList *toklist);
 

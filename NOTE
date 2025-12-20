@@ -338,3 +338,22 @@ semicolon은 선택사항으로 해도 되겠던데?
 Attribute 문법은 #onload, #ontick, #raw 가 더 간지나는  듯ㅇㅇ
 
 매크로 선언은 mac func() { ... }가 아니라 #mac int func() { ... } 이런 느낌이 좋을 듯.
+
+함수 선언 방식을 바꿔야할 듯?
+
+흐음.. 일단 return은 이제 없다..
+그러니 int main(); 이런 방식은 버려야 하는데
+
+그리고 함수와 명령어를 구분해야하나?
+아 그건 `$raw()`로 쓰면 명령어, 나머지는 함수니까 뭐..
+
+```
+# functions
+func main() // 이게 나은 듯?
+main::proc()
+# macros
+mac main() // 이게 나은듯?
+#mac func main()
+main::mac()
+```
+

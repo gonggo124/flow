@@ -29,7 +29,6 @@ typedef struct {
 	int size;
 } TOK_State;
 
-
 static int none(Tokenizer *tok, char chr); // do nothing
 static int pushc(Tokenizer *tok, char chr); // push char to buf
 static int tokc(Tokenizer *tok, char chr); // tokenize current(only buf, ignore chr)
@@ -65,7 +64,7 @@ static const TOK_State States[] = {
 		.acts      = {pushc       },
 		.size      = 0
 	},
-	{ // TODO: number state
+	{ // number state
 		.condition = {NUMBERCHARS ,/*DEFAULT*/ },
 		.next      = {STATE_NUMBER,STATE_NORMAL},
 		.acts      = {pushc       ,tokcw       },
@@ -111,7 +110,7 @@ int TOK_Tokenizer_init(Tokenizer *tok, FILE *file) {
 	tok->state = STATE_NORMAL;
 	tok->file = file;
 	memset(tok->buf,0,TOK_BUF_SIZE);
-	TOK_TokenList_clear(&tok->toks);
+	tok->toks = TOK_TokenList_make(64);
 	return 0;
 }
 
@@ -135,6 +134,8 @@ static int Tokenize(Token *tok, char *buf) {
 		}
 	} else {
 		if (strcmp(buf,"module")==0) tok->type = TOK_MODULE;
+		else if (strcmp(buf,"func")==0) tok->type = TOK_FUNC;
+		else if (strcmp(buf,"mac")==0) tok->type = TOK_MAC;
 		else if (strcmp(buf,"mo")==0) tok->type = TOK_MO;
 		else if (strcmp(buf,"di")==0) tok->type = TOK_DI;
 		else tok->type = TOK_IDENTIFIER;
@@ -190,24 +191,4 @@ static int toka(Tokenizer *tok, char chr) {
 	must(pushc(tok,chr));
 	must(tokc(tok,chr));
 	return 0;
-}
-
-
-
-void TOK_TokenList_push(TokenList *toklist, Token tok) {
-	if (toklist->offset < 169) {
-		toklist->arr[toklist->offset]=tok;
-		toklist->offset++;
-	}
-}
-
-void TOK_TokenList_pop(TokenList *toklist) {
-	(void)toklist;
-}	
-void TOK_TokenList_clear(TokenList *toklist) {
-	memset(toklist,0,169*sizeof(Token));
-	(void)toklist;
-}
-void TOK_TokenList_destroy(TokenList *toklist) {
-	(void)toklist;
 }
