@@ -17,6 +17,19 @@ TokenList TOK_TokenList_make(size_t start_cap) {
 	return new_list;
 }
 
+Token* TOK_TokenList_getN(TokenList* list, size_t n) {
+	if (n >= list->size) return NULL;
+	return &list->data[n];
+}
+Token* TOK_TokenList_get_first(TokenList* list) {
+	if (list->size < 1) return NULL;
+	return &list->data[0];
+}
+Token* TOK_TokenList_get_last(TokenList* list) {
+	if (list->size < 1) return NULL;
+	return &list->data[list->size-1];
+}
+
 void TOK_TokenList_extend(TokenList* list, size_t extend_amount) {
 	assert(list->data!=NULL);
 	size_t new_cap = list->cap+extend_amount;

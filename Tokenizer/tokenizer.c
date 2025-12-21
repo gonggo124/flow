@@ -114,6 +114,10 @@ int TOK_Tokenizer_init(Tokenizer *tok, FILE *file) {
 	return 0;
 }
 
+void TOK_Tokenizer_destroy(Tokenizer *tok) {
+	TOK_TokenList_destroy(&tok->toks);
+}
+
 static int Tokenize(Token *tok, char *buf) {
 	if (buf[0]==0) return 0;
 	// TODO: Do Tokenize Shit

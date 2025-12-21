@@ -68,4 +68,9 @@
 
 2025.12.20(2)
 - TokenList를 Dynamic Array로 전환함. (아마도 작?동)
-- Parser걍 다 밀어버림. 새로운 구조 도입 예정
+- Parser 걍 다 밀어버림. 새로운 구조 도입 예정
+
+2025.12.21(1)
+- Parser 다시 구현 시작
+- Parser가 TokenList 읽는 방식 변경
+- Parser 구조체 구조 약간 변경

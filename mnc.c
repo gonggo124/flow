@@ -64,10 +64,9 @@ void wd_callback(const char* path) {
 		Tokenizer tokenizer = {0};
 		TOK_Tokenizer_init(&tokenizer,file);
 		TOK_Tokenizer_scan(&tokenizer);
-		for (int i = 0; i < 169; i++) {
-			Token *item = &(tokenizer.toks.data[i]);
-			if (item->type == 0) continue;
-			printf("tok[%d] at %d: \"%s\"\n", item->type, item->linenum, item->value);
+		for (size_t i = 0; i < tokenizer.toks.size; i++) {
+			Token *item = TOK_TokenList_getN(&tokenizer.toks,i);
+			printf("tok[%d] at %d: \"%s\"\n", item->type, item->linenum+1, item->value);
 		}
 		printf("==============================\n");
 		
@@ -77,6 +76,8 @@ void wd_callback(const char* path) {
 		if (parse_err < 0) {
 			printf("Parse Error: %s at %s:%d\n",PAR_get_error(parse_err),path,parser.linenum);
 		}
+
+		TOK_Tokenizer_destroy(&tokenizer); // Parser도 toks 써야해서 여기서 destroy
 
 		fclose(file);
 	}

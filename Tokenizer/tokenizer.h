@@ -3,7 +3,8 @@
 #include <stdio.h>
 
 enum {
-	TOK_MODULE = 1, // 'module'
+	TOK_EOF = 0,
+	TOK_MODULE, // 'module'
 	TOK_FUNC, // 'func'
 	TOK_MAC, // 'mac'
 	TOK_IDENTIFIER, // 나머지
@@ -17,7 +18,7 @@ enum {
 	TOK_LITERAL // "abc", 123 등..
 };
 
-typedef int TOK_size_t;
+typedef size_t TOK_size_t;
 typedef int TOK_state_t;
 typedef int TOK_line_t;
 typedef int TOK_Type;
@@ -41,6 +42,9 @@ void TOK_TokenList_extend(TokenList *toklist, size_t extend_amount);
 void TOK_TokenList_push(TokenList *toklist, Token tok);
 void TOK_TokenList_clear(TokenList *toklist);
 void TOK_TokenList_destroy(TokenList *toklist);
+Token* TOK_TokenList_getN(TokenList* list, size_t n);
+Token* TOK_TokenList_get_first(TokenList* list);
+Token* TOK_TokenList_get_last(TokenList* list);
 
 typedef struct {
 	FILE* file;
@@ -63,5 +67,6 @@ typedef struct {
 int TOK_Tokenizer_scan(Tokenizer *tok); // 0 == 정상, 나머지 == 파싱 에러 발생
 int TOK_Tokenizer_init(Tokenizer *tok, FILE* file); // 0 == 정상, 나머지 == 에러 발생
 void TOK_strerr(char *buf, int errno); // 파싱 에러 코드를 문자열로 변환
+void TOK_Tokenizer_destroy(Tokenizer *tok);
 
 #endif // MNC_Tok
