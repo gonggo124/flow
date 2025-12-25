@@ -74,3 +74,6 @@
 - Parser 다시 구현 시작
 - Parser가 TokenList 읽는 방식 변경
 - Parser 구조체 구조 약간 변경
+
+2025.12.25
+- Parser의 module과 func관리 부분 개발. 아직 미완

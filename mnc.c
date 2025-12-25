@@ -73,7 +73,7 @@ void wd_callback(const char* path) {
 		Parser parser = {0};
 		PAR_Parser_init(&parser,&tokenizer.toks);
 		int parse_err = PAR_Parser_scan(&parser);
-		if (parse_err < 0) {
+		if (parse_err != 0) {
 			printf("Parse Error: %s at %s:%d\n",PAR_get_error(parse_err),path,parser.linenum);
 		}
 
