@@ -357,3 +357,12 @@ mac main() // 이게 나은듯?
 main::mac()
 ```
 
+Parser가 파일 생성하게 하는건 좀 에반데. 그냥 파일 생성용 문법 하나 만들까? 파싱하기 엄청 쉬운걸로
+
+```
+make file.mcfunction
+write say "hello"
+write execute as @a run say "hi"
+```
+
+ㅇㅋ 좋은듯

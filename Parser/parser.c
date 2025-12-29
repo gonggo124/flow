@@ -16,9 +16,10 @@ static Token* next(Parser* p) {
         else return &p->toks->data[++p->stack_offset];
 }
 
-void PAR_Parser_init(Parser* p, TokenList* toks) {
+void PAR_Parser_init(Parser* p, TokenList* toks, FILE* output_file) {
         p->toks = toks;
         p->stack_offset = 0;
+        p->output_file = output_file;
 }
 
 static int start_module_statement(Parser* p, Token* cur_tok) {
@@ -28,7 +29,8 @@ static int start_module_statement(Parser* p, Token* cur_tok) {
         shouldBeM(next_tok,TOK_LITERAL,ERR_UNEXPECTED_TOKEN);
 
         // TODO: do some module system
-        printf("set module\n");
+        strcpy(p->cur_module,next_tok->value);
+        printf("set module to \"%s\"\n", p->cur_module);
         return 0;
 }
 
@@ -38,6 +40,8 @@ static int start_func_definition(Parser* p, Token* cur_tok) {
         Token* next_tok = next(p);
         notNullM(next_tok,ERR_UNEXPECTED_EOF);
         shouldBeM(next_tok,TOK_IDENTIFIER,ERR_UNEXPECTED_TOKEN);
+
+        printf("func name: \"%s\"\n", next_tok->value);
         return 0;
 }
 

@@ -57,9 +57,9 @@ void wd_callback(const char* path) {
                 char copied_path[PATH_SIZE]; strcpy(copied_path,path);
                 char *extender = strrchr(copied_path,'.');
                 if (extender) extender++;
-                else { printf("couldn't find file extender"); return; }
+                else { printf("couldn't find file extender"); fclose(file); return; }
 
-                if (strcmp(extender,"mn")!=0) return;
+                if (strcmp(extender,"mn")!=0) { fclose(file); return; }
 
                 Tokenizer tokenizer = {0};
                 TOK_Tokenizer_init(&tokenizer,file);
@@ -70,15 +70,17 @@ void wd_callback(const char* path) {
                 }
                 printf("==============================\n");
 
+                FILE* output_file = fopen("output.mno","w");
+
                 Parser parser = {0};
-                PAR_Parser_init(&parser,&tokenizer.toks);
+                PAR_Parser_init(&parser,&tokenizer.toks,output_file);
                 int parse_err = PAR_Parser_scan(&parser);
                 if (parse_err != 0) {
                         printf("Parse Error: %s at %s:%d\n",PAR_get_error(parse_err),path,parser.linenum);
                 }
 
                 TOK_Tokenizer_destroy(&tokenizer); // Parser도 toks 써야해서 여기서 destroy
-
+                fclose(output_file);
                 fclose(file);
         }
 }

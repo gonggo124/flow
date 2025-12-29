@@ -102,11 +102,11 @@ int TOK_Tokenizer_scan(Tokenizer *tok) {
         return 0;
 }
 
-int TOK_Tokenizer_wind(Tokenizer *tok, long amount) {
+int TOK_Tokenizer_wind(Tokenizer* tok, long amount) {
         return fseek(tok->file,-amount,SEEK_CUR);
 }
 
-int TOK_Tokenizer_init(Tokenizer *tok, FILE *file) {
+int TOK_Tokenizer_init(Tokenizer* tok, FILE* file) {
         tok->state = STATE_NORMAL;
         tok->file = file;
         memset(tok->buf,0,TOK_BUF_SIZE);
