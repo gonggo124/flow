@@ -366,3 +366,14 @@ write execute as @a run say "hi"
 ```
 
 ㅇㅋ 좋은듯
+
+```
+prefix main // = module "main"
+make test.mcfunction // create a file with prefix "main" -> "namespace/main/test.mcfunction"
+write say "something" // write compiled mono code to recent file
+prefix something // = module "something". reset latest prefix: "main" -> "something"
+make test.mcfunction
+write say "test"
+```
+
+이런 느낌?
