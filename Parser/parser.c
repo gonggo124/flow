@@ -43,7 +43,9 @@ static int start_block_statement(Parser* p) {
                 if (cur_tok->type==TOK_R_BRACE) break;
                 switch (cur_tok->type) {
                 case TOK_SEMICOLON: fprintf(p->output_file,"\n"); break;
-                case TOK_IDENTIFIER: {
+                case TOK_LITERAL_NUMBER: fprintf(p->output_file,"%s ",cur_tok->value); break;
+                case TOK_LITERAL_STRING: fprintf(p->output_file,"\"%s\" ",cur_tok->value); break;
+                default: 
                         if (cur_tok->value[0]=='-') {
                                 char *ptr = cur_tok->value;
                                 do if (*ptr=='_') *ptr = ' '; while(*++ptr);
@@ -51,10 +53,7 @@ static int start_block_statement(Parser* p) {
                                 fprintf(p->output_file,"%s ",ptr);
                         } else
                                 fprintf(p->output_file,"%s ",cur_tok->value);
-                } break;
-                case TOK_LITERAL_NUMBER: fprintf(p->output_file,"%s ",cur_tok->value); break;
-                case TOK_LITERAL_STRING: fprintf(p->output_file,"\"%s\" ",cur_tok->value); break;
-                default: return ERR_UNEXPECTED_TOKEN;
+                        break;
                 }
         }
         fprintf(p->output_file,"[ block statement end ]\n");

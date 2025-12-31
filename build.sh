@@ -7,3 +7,4 @@ LIBS=""
 
 gcc $CFLAGS -o mnc mnc.c Tokenizer/*.c Parser/*.c $LIBS
 ./mnc dtpk/src -o dtpk/data
+cat output.mno

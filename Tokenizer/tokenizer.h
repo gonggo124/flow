@@ -16,8 +16,10 @@ enum {
         TOK_L_BRACE, // '{'
         TOK_R_BRACE, // '}'
         TOK_SEMICOLON, // ';'
-        TOK_LITERAL_STRING, // "abc", 123 등..
-        TOK_LITERAL_NUMBER, // "abc", 123 등..
+        TOK_COLON, // ':'
+        TOK_LITERAL_STRING, // "abc", "Hello123" 등..
+        TOK_LITERAL_TEXT, // 'abc', 'Hello123' 등...
+        TOK_LITERAL_NUMBER, // 123, 6767 등..
 };
 
 typedef size_t TOK_size_t;

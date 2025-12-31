@@ -3,7 +3,7 @@ prefix main
 make main.mcfunction
 param
 [ block statement ]
-data modify entity @s SelectedItem set value "Hello" 
-scoreboard players add @s obj 1 
-scoreboard players add @s obj 1 
+say Hello, World! 
+#call minecraft : mcfunction 
+scoreboard players set $a obj 10 
 [ block statement end ]

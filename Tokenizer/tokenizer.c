@@ -16,6 +16,8 @@ enum {
         STATE_WORD,
         STATE_STRING,
         STATE_STRING_SKIP,
+        STATE_TEXT,
+        STATE_TEXT_SKIP,
         STATE_NUMBER
 };
 
@@ -35,16 +37,16 @@ static int tokc(Tokenizer *tok, char chr); // tokenize current(only buf, ignore 
 static int toka(Tokenizer *tok, char chr); // tokenize all(buf and chr)
 static int tokcw(Tokenizer *tok, char chr); // tokenize current end wind back(offset-=1)
 
-#define IDCHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+#define IDCHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_$#"
 #define NUMBERCHARS "0123456789"
 
 // MARK: #001
 static const TOK_State States[] = {
         { // normal state
-                .condition = {IDCHARS   ,NUMBERCHARS ," \n\r\t"   ,"{}();"     ,"\""         /*DEFAULT*/ },
-                .next      = {STATE_WORD,STATE_NUMBER,STATE_NORMAL,STATE_NORMAL,STATE_STRING,STATE_NORMAL},
-                .acts      = {pushc     ,pushc       ,tokc        ,toka        ,none        ,pushc       },
-                .size      = 5 // TODO: it's not DRY. FIX IT!!! I WAS ABOUT TO SPEND 10 HOURS TO FIX THE BUG BECAUSE OF IT!!
+                .condition = {IDCHARS   ,NUMBERCHARS ," \n\r\t"   ,"{}();:"     ,"\""        ,"'"          /*DEFAULT*/ },
+                .next      = {STATE_WORD,STATE_NUMBER,STATE_NORMAL,STATE_NORMAL,STATE_STRING,STATE_TEXT  ,STATE_NORMAL},
+                .acts      = {pushc     ,pushc       ,tokc        ,toka        ,none        ,none         ,pushc      },
+                .size      = 6 // TODO: it's not DRY. FIX IT!!! I WAS ABOUT TO SPEND 10 HOURS TO FIX THE BUG BECAUSE OF IT!!
         },
         { // word state
                 .condition = {IDCHARS NUMBERCHARS /*DEFAULT*/ },
@@ -64,6 +66,18 @@ static const TOK_State States[] = {
                 .acts      = {pushc       },
                 .size      = 0
         },
+        { // text state
+                .condition = {"'"        ,"\\"              /*DEFAULT*/ },
+                .next      = {STATE_NORMAL,STATE_TEXT_SKIP,STATE_TEXT   },
+                .acts      = {tokc        ,none           ,pushc        },
+                .size      = 2
+        },
+        { // text-skip state
+                .condition = {/*DEFAULT*/ },
+                .next      = {STATE_TEXT  },
+                .acts      = {pushc       },
+                .size      = 0
+        },
         { // number state
                 .condition = {NUMBERCHARS ,/*DEFAULT*/ },
                 .next      = {STATE_NUMBER,STATE_NORMAL},
@@ -74,15 +88,18 @@ static const TOK_State States[] = {
 
 enum {
         ERR_BUF_OVERFLOW,
-        ERR_UNEXPECTED_TOKEN
+        ERR_UNEXPECTED_TOKEN,
 };
 
 void TOK_strerr(char *buf, int errno) {
          switch (errno) {
-                case ERR_BUF_OVERFLOW:
-                        strcpy(buf,"토큰의 길이가 초과되었습니다: 토큰의 최대 길이는 256 bytes 입니다");
-                break;
-        }
+         case ERR_BUF_OVERFLOW:
+                 strcpy(buf,"토큰의 길이가 초과되었습니다: 토큰의 최대 길이는 256 bytes 입니다");
+                 break;
+         case ERR_UNEXPECTED_TOKEN:
+                 strcpy(buf,"예상하지 못 한 토큰을 발견하였습니다");
+                 break;
+         }
 }
 
 // MARK: #003
@@ -128,12 +145,13 @@ static int Tokenize(Token *tok, char *buf) {
         // type specification
         if (len==1) {
                 switch(buf[0]) {
-                        case '(': tok->type = TOK_L_PAREN; break;
-                        case ')': tok->type = TOK_R_PAREN; break;
-                        case '{': tok->type = TOK_L_BRACE; break;
-                        case '}': tok->type = TOK_R_BRACE; break;
-                        case ';': tok->type = TOK_SEMICOLON; break;
-                        default: return ERR_UNEXPECTED_TOKEN;
+                case '(': tok->type = TOK_L_PAREN; break;
+                case ')': tok->type = TOK_R_PAREN; break;
+                case '{': tok->type = TOK_L_BRACE; break;
+                case '}': tok->type = TOK_R_BRACE; break;
+                case ';': tok->type = TOK_SEMICOLON; break;
+                case ':': tok->type = TOK_COLON; break;
+                default: return ERR_UNEXPECTED_TOKEN;
                 }
         } else {
                 if (strcmp(buf,"module")==0) tok->type = TOK_MODULE;
@@ -174,9 +192,11 @@ static int tokc(Tokenizer *tok, char chr) {
         (void)chr; // trash
 
         Token new_token = make_token(tok);
-        Tokenize(&new_token,tok->buf);
+        int tokenize_ok = Tokenize(&new_token,tok->buf);
+        if (tokenize_ok) return tokenize_ok;
         if (tok->state==STATE_STRING) new_token.type=TOK_LITERAL_STRING;
         else if (tok->state==STATE_NUMBER) new_token.type=TOK_LITERAL_NUMBER;
+        else if (tok->state==STATE_TEXT) new_token.type=TOK_LITERAL_TEXT;
 
         da_append(tok->toks,new_token);
 

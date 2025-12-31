@@ -63,7 +63,13 @@ void wd_callback(const char* path) {
 
                 Tokenizer tokenizer = {0};
                 TOK_Tokenizer_init(&tokenizer,file);
-                TOK_Tokenizer_scan(&tokenizer);
+                int tokenizing_err = TOK_Tokenizer_scan(&tokenizer);
+                if (tokenizing_err) {
+                        // TODO: 에러 발생 위치 출력
+                        fclose(file);
+                        printf("Tokenization failed with error code %d\n", tokenizing_err);
+                        return;
+                }
                 for (size_t i = 0; i < tokenizer.toks.size; i++) {
                         Token *item = &tokenizer.toks.data[i];
                         printf("tok[%d] at %d: \"%s\"\n", item->type, item->linenum+1, item->value);
