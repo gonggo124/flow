@@ -377,3 +377,171 @@ write say "test"
 ```
 
 이런 느낌?
+
+흠 굳이 매개변수가 필요할까?
+변수는? 변수가 필요할까?
+
+좀 더 마크에 잘맞는 방식은 없을까?
+마크 이 똥겜은 변수 지원하기는 어려워 보이는데
+
+```
+func main() {
+        if entity @e[distance=..5,type=pig] {
+                say "hello"
+        }
+}
+```
+
+변수 빼고 편의로 가자
+일단 execute 생략기능 있으면 좋을거 같은데
+
+!@#$%^&*중에 하나를 execute 대용으로 쓰면 좋을듯
+^if, ^store, ^as
+좋은데? `^`로 간다
+
+매개변수, 변수가 빠졌으니 main()의 괄호는 뺴도 되겠지? 잠깐, 함수 호출 어케하지 모듈 시스템 때문에 경로 꼬이는데?
+잠깐, 매개변수랑 변수 있어야 될거같은데.. 근데 정수만 취급하면 될듯?
+
+```
+module "main"
+
+import "std"
+
+func main() {
+        std::knockback(@s, 10) // 이런 느낌을 원했으나..
+        ^as @s run std::knockback(10) // 이런 느낌으로 가야하나? 구린데 일반 명령어는 어떻게 해야하지?
+        say hello // 이러면 명령의 끝을 구분하는데 '\n'을 쓰겠지?
+        say hello \
+                world // 이렇게 하면 될 듯
+}
+```
+
+함수 호출을 표현하는 기호도 하나 있어야할 듯?
+!@#$%&*
+
+걍 function 명령을 개조하자
+function knockback // -> 현재 모듈의 함수 호출
+function std::knockback // -> std 모듈읠 함수 호출(알아서 실제 경로로 바뀜)
+function std:knockback // -> dtpk/data/std/knockback.mcfunction을 호출
+
+아니면 call이라는 명령을 따로 만들수도??
+call knockback // -> 현재 모듈의 함수 호출
+call std::knockback // -> std 모듈읠 함수 호출(알아서 실제 경로로 바뀜)
+call std:knockback // -> dtpk/data/std/knockback.mcfunction을 호출
+
+mono의 고유 명령엔 #을 붙여서 호출하게 할까?
+#call knockback // -> 현재 모듈의 함수 호출
+#call std::knockback // -> std 모듈읠 함수 호출(알아서 실제 경로로 바뀜)
+#call std:knockback // -> dtpk/data/std/knockback.mcfunction을 호출
+
+좋다
+
+#call std::knockback(10)
+
+이런 것도 되겠네
+
+```
+module "main"
+
+import "std"
+
+func main() {
+        ^as @s \
+        at @s \
+        run #call std::knockback(10)
+}
+```
+
+잠깐만.. '\n'은 토큰이 아니라서 구문을 구분할 수 없는데. 
+걍 ';' 쓰자
+
+```
+func main() {
+        ^as @s
+        at @s
+        run #call std::knockback(10);
+}
+```
+
+namespace, 스코어보드 이름, 태그 이름, say 명령의 인자 등은 ""로 묶여서 사용되게 하자
+
+```
+func main() {
+        say "Hello";
+        scoreboard players set @s "obj" 1;
+        scoreboard players set "a" "obj" 1;
+        function "test:something";
+        data modify storage "test:data" "something" set value "fdsjkl";
+        tag add @s "something";
+}
+```
+
+이런 느낌? 이러면 Tokenize하기 쉬움
+아 잠깐 진짜 "fds"이런 문자열과 혼동되잖아?
+
+data modify entity @s `SelectedItem` set value "Hello";
+
+이런건 어때?
+
+data.modify.entity(@s,"SelectedItem").setValue("Hello");
+
+아 뭐야 data modify entity @s "SelectedItem" set value "Hello"
+이거 생 mcfunction으로 컴파일되네? 오
+
+gcc -o main main.c
+gcc[o:main] << main.c
+
+data << [modify;entity] << @s << "SelectedItem" << [set;value] << "Hello";
+
+에휴 걍 하자
+
+잠깐 function은 구분자를 ""로 감싸서 받지 못하네? 아놔 젠장 scoreboard도 마찬가지
+
+걍 ''로 구분하자
+
+scoreboard objectives add obj dummy
+scoreboard.objectives.add(obj dummy)
+
+data modify entity @s SelectedItem set value "Hello"
+data.modify.entity(@s SelectedItem).set.value("Hello")
+
+data modify entity @s 'run' set value "Hello"
+
+execute as @s if function run run say "Hi"
+execute as @s if function 'run' run say "Hi"
+execute.as"@s" if.function"run" run say"Hi"
+
+execute.as @s if.function run run say Hi
+
+execute as @s at @s run say 1
+as/at/run=keyword
+@s/1=value
+execute/say=cmd
+
+execute as @s at @s run say 1
+execute -as @s -at @s say 1
+
+data modify entity @s SelectedItem set value "abc"
+data -modify_entity @s SelectedItem -set_value "abc" // 이거 좋은듯?
+이런 식이라면 execute는:
+execute -as @s -at @s -run say 1
+
+키워드는 -로 시작하고, 나머지는 그냥 시작하는거지
+
+잠깐, say는 모든 문자가 입력될 수 있는데?
+
+예상:
+say -abc // -> [@s] -abc
+오류:
+say -abc // -> [@s] abc
+
+아놔 say가 문제야!! 아 잠깐만 걍 ""로 감싸면 되잖아?
+
+
+scoreboard.objectives.add (obj dummy)
+
+```
+func main("a": obj) {
+        tellraw @a {score:{name:"a",objective:"obj"}};
+}
+```

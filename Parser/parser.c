@@ -17,6 +17,7 @@ static Token* next(Parser* p) {
 }
 
 void PAR_Parser_init(Parser* p, TokenList* toks, FILE* output_file) {
+        //assert(false && "parser is not implemented");
         p->toks = toks;
         p->stack_offset = 0;
         p->output_file = output_file;
@@ -25,7 +26,7 @@ void PAR_Parser_init(Parser* p, TokenList* toks, FILE* output_file) {
 static int start_module_statement(Parser* p) {
         Token* next_tok = next(p);
         notNullM(next_tok);
-        shouldBeM(next_tok,TOK_LITERAL,ERR_UNEXPECTED_TOKEN);
+        shouldBeM(next_tok,TOK_LITERAL_STRING,ERR_UNEXPECTED_TOKEN);
 
         // TODO: do some module system
         strcpy(p->cur_module,next_tok->value);
@@ -33,15 +34,40 @@ static int start_module_statement(Parser* p) {
         return 0;
 }
 
-/* static int start_block_statement(Parser* p, Token* cur_tok) { */
-/*         (void)p; */
-/*         (void)cur_tok; */
-/*         return 0; */
-/* } */
+static int start_block_statement(Parser* p) {
+        // TODO: do some block statement thing
+        fprintf(p->output_file,"[ block statement ]\n");
+        while (1) {
+                Token* cur_tok = next(p);
+                notNullM(cur_tok);
+                if (cur_tok->type==TOK_R_BRACE) break;
+                switch (cur_tok->type) {
+                case TOK_SEMICOLON: fprintf(p->output_file,"\n"); break;
+                case TOK_IDENTIFIER: {
+                        if (cur_tok->value[0]=='-') {
+                                char *ptr = cur_tok->value;
+                                do if (*ptr=='_') *ptr = ' '; while(*++ptr);
+                                ptr = (cur_tok->value)+1;
+                                fprintf(p->output_file,"%s ",ptr);
+                        } else
+                                fprintf(p->output_file,"%s ",cur_tok->value);
+                } break;
+                case TOK_LITERAL_NUMBER: fprintf(p->output_file,"%s ",cur_tok->value); break;
+                case TOK_LITERAL_STRING: fprintf(p->output_file,"\"%s\" ",cur_tok->value); break;
+                default: return ERR_UNEXPECTED_TOKEN;
+                }
+        }
+        fprintf(p->output_file,"[ block statement end ]\n");
+        
+        return 0;
+}
 
 static int start_param_statement(Parser* p) {
         // TODO: do some params thing
-        (void)p;
+        Token* param_tok = next(p);
+        notNullM(param_tok);
+        shouldBeM(param_tok,TOK_R_PAREN,ERR_UNEXPECTED_TOKEN);
+        fprintf(p->output_file, "param\n");
         return 0;
 }
 
@@ -56,7 +82,11 @@ static int start_func_definition(Parser* p) {
         notNullM(param_tok);
         shouldBeM(param_tok,TOK_L_PAREN,ERR_UNEXPECTED_TOKEN);
         start_param_statement(p);
-        // TODO: do some block statement thing
+
+        Token* block_start_tok = next(p);
+        notNullM(block_start_tok);
+        shouldBeM(block_start_tok,TOK_L_BRACE,ERR_UNEXPECTED_TOKEN);
+        start_block_statement(p);
         
         return 0;
 }

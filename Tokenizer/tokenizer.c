@@ -175,7 +175,8 @@ static int tokc(Tokenizer *tok, char chr) {
 
         Token new_token = make_token(tok);
         Tokenize(&new_token,tok->buf);
-        if (tok->state==STATE_STRING || tok->state==STATE_NUMBER) new_token.type=TOK_LITERAL;
+        if (tok->state==STATE_STRING) new_token.type=TOK_LITERAL_STRING;
+        else if (tok->state==STATE_NUMBER) new_token.type=TOK_LITERAL_NUMBER;
 
         da_append(tok->toks,new_token);
 

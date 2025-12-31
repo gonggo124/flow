@@ -1,4 +1,7 @@
 module "main"
 
 func main() {
+        data -modify_entity @s SelectedItem -set_value "Hello";
+        scoreboard -players_add @s obj 1;
+        scoreboard -players -add @s obj 1;
 }
