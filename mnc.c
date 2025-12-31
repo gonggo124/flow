@@ -68,7 +68,7 @@ void wd_callback(const char* path) {
                         // TODO: 에러 발생 위치 출력
                         fclose(file);
                         printf("Tokenization failed with error code %d\n", tokenizing_err);
-                        return;
+                        exit(1);
                 }
                 for (size_t i = 0; i < tokenizer.toks.size; i++) {
                         Token *item = &tokenizer.toks.data[i];
@@ -83,6 +83,10 @@ void wd_callback(const char* path) {
                 int parse_err = PAR_Parser_scan(&parser);
                 if (parse_err != 0) {
                         printf("Parse Error: %s at %s:%d\n",PAR_get_error(parse_err),path,parser.linenum);
+                        TOK_Tokenizer_destroy(&tokenizer); // Parser도 toks 써야해서 여기서 destroy
+                        fclose(output_file);
+                        fclose(file);
+                        exit(1);
                 }
 
                 TOK_Tokenizer_destroy(&tokenizer); // Parser도 toks 써야해서 여기서 destroy

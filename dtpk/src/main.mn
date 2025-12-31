@@ -2,6 +2,17 @@ module "main"
 
 func main() {
         say 'Hello, World!';
-        #call minecraft:mcfunction;
+        #call foo:bar;
         scoreboard -players_set $a obj 10;
+        scoreboard -players_operation $a obj *= $b obj;
+        scoreboard -players_operation $a obj /= $b obj;
+        scoreboard -players_operation $a obj += $b obj;
+        scoreboard -players_operation $a obj -= $b obj;
+        scoreboard -players_operation $a obj %= $b obj;
+        scoreboard -players_operation $a obj >< $b obj;
+        scoreboard -players_operation $a obj = $b obj;
+        scoreboard -players_operation $a obj < $b obj;
+        scoreboard -players_operation $a obj > $b obj;
+        execute -if_items_entity @s weapon.mainhand *[minecraft:custom_data~{a:1}];
 }
+

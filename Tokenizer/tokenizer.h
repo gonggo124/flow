@@ -17,6 +17,7 @@ enum {
         TOK_R_BRACE, // '}'
         TOK_SEMICOLON, // ';'
         TOK_COLON, // ':'
+        TOK_DOT, // '.'
         TOK_LITERAL_STRING, // "abc", "Hello123" 등..
         TOK_LITERAL_TEXT, // 'abc', 'Hello123' 등...
         TOK_LITERAL_NUMBER, // 123, 6767 등..

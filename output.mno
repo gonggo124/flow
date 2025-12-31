@@ -3,7 +3,17 @@ prefix main
 make main.mcfunction
 param
 [ block statement ]
-say Hello, World! 
-#call minecraft : mcfunction 
-scoreboard players set $a obj 10 
+( say ) ( Hello, World! ) 
+( #call ) ( foo ) ( : ) ( bar ) 
+( scoreboard ) ( -players_set ) ( $a ) ( obj ) ( 10 ) 
+( scoreboard ) ( -players_operation ) ( $a ) ( obj ) ( *= ) ( $b ) ( obj ) 
+( scoreboard ) ( -players_operation ) ( $a ) ( obj ) ( /= ) ( $b ) ( obj ) 
+( scoreboard ) ( -players_operation ) ( $a ) ( obj ) ( += ) ( $b ) ( obj ) 
+( scoreboard ) ( -players_operation ) ( $a ) ( obj ) ( -= ) ( $b ) ( obj ) 
+( scoreboard ) ( -players_operation ) ( $a ) ( obj ) ( %= ) ( $b ) ( obj ) 
+( scoreboard ) ( -players_operation ) ( $a ) ( obj ) ( >< ) ( $b ) ( obj ) 
+( scoreboard ) ( -players_operation ) ( $a ) ( obj ) ( = ) ( $b ) ( obj ) 
+( scoreboard ) ( -players_operation ) ( $a ) ( obj ) ( < ) ( $b ) ( obj ) 
+( scoreboard ) ( -players_operation ) ( $a ) ( obj ) ( > ) ( $b ) ( obj ) 
+( execute ) ( -if_items_entity ) ( @s ) ( weapon.mainhand ) ( *[minecraft ) ( : ) ( custom_data ) ( ~ ) ( { ) ( a ) ( : ) ( 1 ) ( } ) ( ] ) 
 [ block statement end ]

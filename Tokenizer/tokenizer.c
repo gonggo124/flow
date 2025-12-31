@@ -11,7 +11,7 @@
 
 typedef int (*TOK_act_c)(Tokenizer *tok, char chr);
 
-enum {
+typedef enum {
         STATE_NORMAL = 0,
         STATE_WORD,
         STATE_STRING,
@@ -19,7 +19,7 @@ enum {
         STATE_TEXT,
         STATE_TEXT_SKIP,
         STATE_NUMBER
-};
+} State;
 
 #define CONDITION_LEN 7
 #define NEXT_LEN CONDITION_LEN+1
@@ -43,7 +43,7 @@ static int tokcw(Tokenizer *tok, char chr); // tokenize current end wind back(of
 // MARK: #001
 static const TOK_State States[] = {
         { // normal state
-                .condition = {IDCHARS   ,NUMBERCHARS ," \n\r\t"   ,"{}();:"     ,"\""        ,"'"          /*DEFAULT*/ },
+                .condition = {IDCHARS   ,NUMBERCHARS ," \n\r\t"   ,"{}();:."     ,"\""        ,"'"          /*DEFAULT*/ },
                 .next      = {STATE_WORD,STATE_NUMBER,STATE_NORMAL,STATE_NORMAL,STATE_STRING,STATE_TEXT  ,STATE_NORMAL},
                 .acts      = {pushc     ,pushc       ,tokc        ,toka        ,none        ,none         ,pushc      },
                 .size      = 6 // TODO: it's not DRY. FIX IT!!! I WAS ABOUT TO SPEND 10 HOURS TO FIX THE BUG BECAUSE OF IT!!
@@ -130,11 +130,11 @@ int TOK_Tokenizer_init(Tokenizer* tok, FILE* file) {
         return 0;
 }
 
-void TOK_Tokenizer_destroy(Tokenizer *tok) {
+void TOK_Tokenizer_destroy(Tokenizer* tok) {
         da_destroy(tok->toks);
 }
 
-static int Tokenize(Token *tok, char *buf) {
+static int Tokenize(Token* tok, State state, char* buf) {
         if (buf[0]==0) return 0;
         // TODO: Do Tokenize Shit
 
@@ -142,8 +142,10 @@ static int Tokenize(Token *tok, char *buf) {
 
         size_t len = strlen(buf);
 
-        // type specification
-        if (len==1) {
+        if (state==STATE_STRING) tok->type=TOK_LITERAL_STRING;
+        else if (state==STATE_NUMBER) tok->type=TOK_LITERAL_NUMBER;
+        else if (state==STATE_TEXT) tok->type=TOK_LITERAL_TEXT;
+        else if (len==1) {
                 switch(buf[0]) {
                 case '(': tok->type = TOK_L_PAREN; break;
                 case ')': tok->type = TOK_R_PAREN; break;
@@ -151,7 +153,8 @@ static int Tokenize(Token *tok, char *buf) {
                 case '}': tok->type = TOK_R_BRACE; break;
                 case ';': tok->type = TOK_SEMICOLON; break;
                 case ':': tok->type = TOK_COLON; break;
-                default: return ERR_UNEXPECTED_TOKEN;
+                case '.': tok->type = TOK_DOT; break;
+                default: tok->type = TOK_LITERAL_TEXT; break;
                 }
         } else {
                 if (strcmp(buf,"module")==0) tok->type = TOK_MODULE;
@@ -192,11 +195,8 @@ static int tokc(Tokenizer *tok, char chr) {
         (void)chr; // trash
 
         Token new_token = make_token(tok);
-        int tokenize_ok = Tokenize(&new_token,tok->buf);
+        int tokenize_ok = Tokenize(&new_token,tok->state,tok->buf);
         if (tokenize_ok) return tokenize_ok;
-        if (tok->state==STATE_STRING) new_token.type=TOK_LITERAL_STRING;
-        else if (tok->state==STATE_NUMBER) new_token.type=TOK_LITERAL_NUMBER;
-        else if (tok->state==STATE_TEXT) new_token.type=TOK_LITERAL_TEXT;
 
         da_append(tok->toks,new_token);
 

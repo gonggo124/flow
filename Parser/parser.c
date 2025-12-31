@@ -34,32 +34,73 @@ static int start_module_statement(Parser* p) {
         return 0;
 }
 
+/* typedef struct { */
+/*         Token** data; */
+/*         size_t size; */
+/*         size_t cap; */
+/* } */
+
+#define reset(x) do { buf_ptr = x; buf_range = 1; } while(0)
+#define push() do {                                                     \
+        if (buf_ptr) {                                                  \
+                fprintf(p->output_file,"( ");                           \
+                for (size_t i = 0; i < buf_range; i++)                  \
+                        fprintf(p->output_file,"%s",buf_ptr[i].value);  \
+                fprintf(p->output_file," ) ");                          \
+                reset(NULL);                                            \
+        }                                                               \
+        } while(0)
 static int start_block_statement(Parser* p) {
         // TODO: do some block statement thing
+        // TODO: 괴랄한 코드 리팩터링
         fprintf(p->output_file,"[ block statement ]\n");
-        while (1) {
+        Token* buf_ptr = NULL;
+        size_t buf_range = 1;
+        int brace_stack = 1;
+        char print_prev = 1;
+        while (brace_stack) {
                 Token* cur_tok = next(p);
                 notNullM(cur_tok);
-                if (cur_tok->type==TOK_R_BRACE) break;
+
                 switch (cur_tok->type) {
-                case TOK_SEMICOLON: fprintf(p->output_file,"\n"); break;
-                case TOK_LITERAL_NUMBER: fprintf(p->output_file,"%s ",cur_tok->value); break;
-                case TOK_LITERAL_STRING: fprintf(p->output_file,"\"%s\" ",cur_tok->value); break;
-                default: 
-                        if (cur_tok->value[0]=='-') {
-                                char *ptr = cur_tok->value;
-                                do if (*ptr=='_') *ptr = ' '; while(*++ptr);
-                                ptr = (cur_tok->value)+1;
-                                fprintf(p->output_file,"%s ",ptr);
-                        } else
-                                fprintf(p->output_file,"%s ",cur_tok->value);
+                case TOK_L_BRACE: brace_stack++; break;
+                case TOK_R_BRACE: brace_stack--; break;
+                }
+
+                switch (cur_tok->type) {
+                case TOK_SEMICOLON:
+                        push();
+                        fprintf(p->output_file,"\n");
+                        reset(NULL);
                         break;
+                case TOK_DOT:
+                        if (buf_ptr->type == TOK_IDENTIFIER) {
+                                print_prev = 0;
+                        }
+                        break;
+                default: if (print_prev) push(); else print_prev = 1;
+                }
+
+                switch (cur_tok->type) {
+                case TOK_SEMICOLON: break;
+                default: if (buf_ptr) buf_range++; else reset(cur_tok);
                 }
         }
         fprintf(p->output_file,"[ block statement end ]\n");
         
         return 0;
 }
+#undef reset
+#undef push
+
+/* if (cur_tok->value[0]=='-') { */
+/*         char *ptr = cur_tok->value; */
+/*         do if (*ptr=='_') *ptr = ' '; while(*++ptr); */
+/*         ptr = (cur_tok->value)+1; */
+/*         fprintf(p->output_file,"%s ",ptr); */
+/*  } else */
+/*         fprintf(p->output_file,"%s ",cur_tok->value); */
+/* break; */
 
 static int start_param_statement(Parser* p) {
         // TODO: do some params thing
